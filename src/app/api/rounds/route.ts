@@ -8,7 +8,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const { playerId, courseName, courseId, teeColor, totalHoles, holes } = body
+  const { playerId, courseName, courseId, teeColor, totalHoles, holes, gameMode } = body
   const round = await createRound({
     playerId: playerId || 'local',
     courseName,
@@ -16,6 +16,7 @@ export async function POST(req: Request) {
     teeColor,
     totalHoles,
     holes,
+    gameMode: gameMode || 'stroke-play',
   })
   return NextResponse.json(round, { status: 201 })
 }

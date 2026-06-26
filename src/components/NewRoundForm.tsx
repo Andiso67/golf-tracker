@@ -8,29 +8,55 @@ import {
   DEFAULT_TEES,
   DEFAULT_PARS_18,
   DEFAULT_PARS_9,
+  GAME_MODES,
+  isTeamMode,
+  isTwoPlayerMode,
+  playerFullName,
+  type GameMode,
 } from '@/types';
-import type { SavedCourse, CourseTee } from '@/types';
+import type { SavedCourse, CourseTee, Player } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
-import { ChevronDown, MapPin, Plus } from 'lucide-react';
+import { ChevronDown, MapPin, Plus, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function NewRoundForm() {
   const router = useRouter();
   const courses = useStore((s) => s.courses);
+  const allPlayers = useStore((s) => s.players);
+  const activePlayer = useStore((s) => s.player);
   const startRound = useStore((s) => s.startRound);
   const { t } = useTranslation();
 
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [showCoursePicker, setShowCoursePicker] = useState(false);
+  const [courseFilter, setCourseFilter] = useState('');
   const [customCourseName, setCustomCourseName] = useState('');
+  const [gameMode, setGameMode] = useState<GameMode>('stroke-play');
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([activePlayer?.id || '']);
+  const [showPlayerPicker, setShowPlayerPicker] = useState(false);
+
   const [selectedTee, setSelectedTee] = useState<string | null>(null);
   const [totalHoles, setTotalHoles] = useState<9 | 18>(18);
   const [parInputs, setParInputs] = useState<number[]>(DEFAULT_PARS_18);
   const [customPars, setCustomPars] = useState(false);
 
+  const needsTwoPlayers = isTwoPlayerMode(gameMode);
+
   const selectedCourse = selectedCourseId
     ? courses.find((c) => c.id === selectedCourseId)
     : undefined;
+
+  const filteredCourses = courseFilter
+    ? courses.filter((c) =>
+        c.name.toLowerCase().includes(courseFilter.toLowerCase())
+      )
+    : courses;
+
+  const getSelectedPlayers = (): Player[] => {
+    return selectedPlayerIds
+      .map((id) => allPlayers.find((p) => p.id === id))
+      .filter((p): p is Player => p !== undefined);
+  };
 
   const handleSelectCourse = (course: SavedCourse) => {
     setSelectedCourseId(course.id);
@@ -41,7 +67,16 @@ export default function NewRoundForm() {
       setParInputs([...course.tees[0].pars]);
     }
     setShowCoursePicker(false);
+    setCourseFilter('');
     setCustomPars(false);
+  };
+
+  const togglePlayer = (playerId: string) => {
+    setSelectedPlayerIds((prev) =>
+      prev.includes(playerId)
+        ? prev.filter((id) => id !== playerId)
+        : [...prev, playerId]
+    );
   };
 
   const handleSelectTee = (tee: CourseTee) => {
@@ -55,6 +90,7 @@ export default function NewRoundForm() {
     setSelectedCourseId(null);
     setSelectedTee(null);
     setShowCoursePicker(false);
+    setCourseFilter('');
     const pars = totalHoles === 9 ? DEFAULT_PARS_9 : DEFAULT_PARS_18;
     setParInputs(pars);
     setCustomPars(false);
@@ -79,13 +115,18 @@ export default function NewRoundForm() {
       : customCourseName.trim();
     if (!courseName) return;
 
+    const players = getSelectedPlayers();
+    if (players.length === 0) return;
+
     const teeColor = selectedCourseId && selectedTee ? selectedTee : DEFAULT_TEES[2].name;
     const id = startRound(
       courseName,
       teeColor,
       totalHoles,
       customPars ? parInputs : undefined,
-      selectedCourseId || undefined
+      selectedCourseId || undefined,
+      gameMode,
+      players
     );
     router.push(`/round/${id}`);
   };
@@ -94,7 +135,8 @@ export default function NewRoundForm() {
   const courseName = selectedCourse
     ? selectedCourse.name
     : customCourseName;
-  const canStart = courseName.trim().length > 0;
+  const selectedPlayers = getSelectedPlayers();
+  const canStart = courseName.trim().length > 0 && selectedPlayers.length > 0;
 
   const availableTees = selectedCourse
     ? selectedCourse.tees
@@ -103,13 +145,85 @@ export default function NewRoundForm() {
 
   return (
     <div className="space-y-5">
+      {/* Game Mode */}
+      <div>
+        <label className="mb-1 block text-sm font-medium text-zinc-500">
+          {t('newRound.gameMode')}
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          {GAME_MODES.map(({ mode, labelKey, descKey }) => (
+            <button
+              key={mode}
+              onClick={() => setGameMode(mode)}
+              className={`rounded-xl p-2.5 text-left transition-all active:scale-95 ${
+                gameMode === mode
+                  ? 'bg-emerald-500 text-white shadow-sm'
+                  : 'border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900'
+              }`}
+            >
+              <span className="block text-xs font-bold">{t(labelKey)}</span>
+              <span className={`block text-[10px] ${gameMode === mode ? 'text-white/70' : 'text-zinc-400'}`}>
+                {t(descKey)}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Player Selection */}
+      <div>
+        <label className="mb-1 block text-sm font-medium text-zinc-500">
+          {t('newRound.playerSelect')}
+        </label>
+        <div className="flex flex-wrap gap-1.5">
+          {allPlayers.map((p) => {
+            const isSelected = selectedPlayerIds.includes(p.id);
+            const isDisabled = needsTwoPlayers && selectedPlayerIds.length >= 2 && !isSelected;
+            return (
+              <button
+                key={p.id}
+                onClick={() => togglePlayer(p.id)}
+                disabled={isDisabled}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                  isSelected
+                    ? 'bg-emerald-500 text-white'
+                    : isDisabled
+                      ? 'cursor-not-allowed bg-zinc-50 text-zinc-300 dark:bg-zinc-800'
+                      : 'border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900'
+                }`}
+              >
+                <User size={12} />
+                {playerFullName(p)}
+              </button>
+            );
+          })}
+          {allPlayers.length === 0 && (
+            <Link
+              href="/settings"
+              className="text-xs font-medium text-emerald-600 dark:text-emerald-400"
+            >
+              {t('settings.addFirstPlayer')}
+            </Link>
+          )}
+        </div>
+        {needsTwoPlayers && selectedPlayerIds.length < 2 && (
+          <p className="mt-1 text-[10px] text-amber-500">
+            {t('newRound.addSecondPlayer')}
+          </p>
+        )}
+      </div>
+
+      {/* Course */}
       <div>
         <label className="mb-1 block text-sm font-medium text-zinc-500">
           {t('newRound.courseName')}
         </label>
 
         <button
-          onClick={() => setShowCoursePicker(!showCoursePicker)}
+          onClick={() => {
+            setShowCoursePicker(!showCoursePicker);
+            if (!showCoursePicker) setCourseFilter('');
+          }}
           className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3 text-left text-lg dark:border-zinc-700 dark:bg-zinc-900"
         >
           <span
@@ -124,7 +238,15 @@ export default function NewRoundForm() {
 
         {showCoursePicker && (
           <div className="mt-2 rounded-xl border border-zinc-200 bg-white p-2 dark:border-zinc-700 dark:bg-zinc-900">
-            {courses.map((course) => (
+            <input
+              type="text"
+              value={courseFilter}
+              onChange={(e) => setCourseFilter(e.target.value)}
+              placeholder={t('newRound.selectCourse')}
+              className="mb-2 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800"
+              autoFocus
+            />
+            {filteredCourses.map((course) => (
               <button
                 key={course.id}
                 onClick={() => handleSelectCourse(course)}

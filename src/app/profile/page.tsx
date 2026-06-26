@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, User, Languages } from 'lucide-react';
+import { Save, User, Languages, Mail, ShieldCheck, ShieldAlert } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -12,27 +12,56 @@ export default function ProfilePage() {
   const setPlayer = useStore((s) => s.setPlayer);
   const storeLanguage = useStore((s) => s.language);
   const setLanguage = useStore((s) => s.setLanguage);
+  const userEmail = useStore((s) => s.userEmail);
+  const userEmailVerified = useStore((s) => s.userEmailVerified);
   const { t } = useTranslation();
 
-  const [name, setName] = useState(player?.name || '');
-  const [handicap, setHandicap] = useState(player?.handicap?.toString() || '');
-  const [homeCourse, setHomeCourse] = useState(player?.homeCourse || '');
+  const [firstName, setFirstName] = useState('');
+  const [lastName1, setLastName1] = useState('');
+  const [lastName2, setLastName2] = useState('');
   const [saved, setSaved] = useState(false);
 
-  const handleSave = () => {
-    setPlayer({
+  useEffect(() => {
+    if (player) {
+      setFirstName(player.firstName || '');
+      setLastName1(player.lastName1 || '');
+      setLastName2(player.lastName2 || '');
+    }
+  }, [player?.id]);
+
+  const handleSave = async () => {
+    const updated = {
       id: player?.id || Date.now().toString(),
-      name: name.trim() || 'Golfer',
-      handicap: parseFloat(handicap) || 0,
-      homeCourse: homeCourse.trim() || 'Local Course',
-    });
+      firstName: firstName.trim() || 'Golfer',
+      lastName1: lastName1.trim(),
+      lastName2: lastName2.trim(),
+      handicap: player?.handicap || 0,
+      homeCourse: player?.homeCourse || '',
+      licenseNumber: player?.licenseNumber || '',
+    };
+    setPlayer(updated);
+
+    if (player?.id) {
+      try {
+        await fetch(`/api/auth/users/${player.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: updated.firstName,
+            lastName1: updated.lastName1,
+            lastName2: updated.lastName2,
+          }),
+        })
+      } catch {}
+    }
+
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
   return (
     <>
-      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-6">
+      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)]">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -53,43 +82,66 @@ export default function ProfilePage() {
         <div className="space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-zinc-500">
-              {t('profile.name')}
+              {t('profile.firstName')}
             </label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('profile.namePlaceholder')}
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder={t('profile.firstNamePlaceholder')}
               className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
             />
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium text-zinc-500">
-              {t('profile.handicap')}
+              {t('profile.lastName1')}
             </label>
             <input
-              type="number"
-              value={handicap}
-              onChange={(e) => setHandicap(e.target.value)}
-              placeholder="0.0"
-              step="0.1"
+              type="text"
+              value={lastName1}
+              onChange={(e) => setLastName1(e.target.value)}
+              placeholder={t('profile.lastName1Placeholder')}
               className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
             />
           </div>
 
           <div>
             <label className="mb-1 block text-sm font-medium text-zinc-500">
-              {t('profile.homeCourse')}
+              {t('profile.lastName2')}
             </label>
             <input
               type="text"
-              value={homeCourse}
-              onChange={(e) => setHomeCourse(e.target.value)}
-              placeholder={t('profile.coursePlaceholder')}
+              value={lastName2}
+              onChange={(e) => setLastName2(e.target.value)}
+              placeholder={t('profile.lastName2Placeholder')}
               className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
             />
           </div>
+
+          {userEmail && (
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Mail size={16} className="text-zinc-400" />
+                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                    {userEmail}
+                  </span>
+                </div>
+                {userEmailVerified ? (
+                  <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+                    <ShieldCheck size={14} />
+                    {t('auth.emailVerified')}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-xs font-medium text-amber-600">
+                    <ShieldAlert size={14} />
+                    {t('auth.emailNotVerified')}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="mb-1 block text-sm font-medium text-zinc-500">

@@ -1,20 +1,30 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Plus, BarChart3, Flag } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Plus, BarChart3, Flag, LogOut, Trash2 } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
+import { isTeamMode, playerFullName } from '@/types';
+import { mediumTap, heavyTap } from '@/lib/haptics';
+import { useRfegHandicapSync } from '@/hooks/useRfegHandicapSync';
 
 function HomeContent() {
   const player = useStore((s) => s.player);
   const rounds = useStore((s) => s.rounds);
   const activeRoundId = useStore((s) => s.activeRoundId);
   const getRoundStats = useStore((s) => s.getRoundStats);
+  const logout = useStore((s) => s.logout);
+  const auth = useStore((s) => s.auth);
+  const deleteRound = useStore((s) => s.deleteRound);
   const { t } = useTranslation();
+  const router = useRouter();
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const syncStatus = useRfegHandicapSync(player);
 
   const activeRound = rounds.find(
     (r) => r.id === activeRoundId && !r.completed
@@ -23,28 +33,77 @@ function HomeContent() {
   const recentRounds = completedRounds.slice(-5).reverse();
 
   const latestStats = activeRoundId ? getRoundStats(activeRoundId) : null;
+  const latestPlayerStats = latestStats?.playerStats?.[0];
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-6">
+    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)]">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
+        className="mb-6 flex items-start justify-between"
       >
-        <h1 className="text-2xl font-bold tracking-tight">
-          {player
-            ? t('home.greeting', { name: player.name })
-            : t('home.appTitle')}
-        </h1>
-        <p className="text-sm text-zinc-500">
-          {player
-            ? t('home.playerInfo', {
-                handicap: player.handicap,
-                course: player.homeCourse,
-              })
-            : t('home.tagline')}
-        </p>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {player
+              ? t('home.greeting', { name: playerFullName(player) })
+              : t('home.appTitle')}
+          </h1>
+          <p className="text-sm text-zinc-500">
+            {t('home.tagline')}
+          </p>
+        </div>
+        {auth.isLoggedIn && (
+          <button
+            onClick={async () => {
+              await logout();
+              router.push('/login');
+            }}
+            className="flex items-center gap-1 rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:border-zinc-700 dark:hover:bg-rose-950/30"
+            title={t('auth.logout')}
+          >
+            <LogOut size={14} />
+            {t('auth.logout')}
+          </button>
+        )}
       </motion.div>
+
+      {syncStatus === 'checking' && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="mb-3 overflow-hidden"
+        >
+          <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-700 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-300">
+            <div className="h-3 w-3 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+            {t('home.handicapChecking')}
+          </div>
+        </motion.div>
+      )}
+
+      {syncStatus === 'updated' && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="mb-3 overflow-hidden"
+        >
+          <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
+            {t('home.handicapUpdated', { handicap: player?.handicap ?? '' })}
+          </div>
+        </motion.div>
+      )}
+
+      {syncStatus === 'error' && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="mb-3 overflow-hidden"
+        >
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+            {t('home.handicapSyncError')}
+          </div>
+        </motion.div>
+      )}
 
       {activeRound && (
         <motion.div
@@ -60,17 +119,24 @@ function HomeContent() {
                   {t('home.roundInProgress')}
                 </span>
               </div>
+              <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-800 dark:text-emerald-200">
+                {activeRound.players.length > 1
+                  ? `${activeRound.players.length} ${t('home.players')}`
+                  : activeRound.players[0]?.playerName}
+              </span>
             </div>
             <p className="text-lg font-bold">{activeRound.courseName}</p>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
               {t('home.holesPlayed', {
-                played: activeRound.holes.filter((h) => h.score > 0).length,
+                played: activeRound.players[0]?.holes.filter((h) => h.score > 0).length || 0,
                 total: activeRound.totalHoles,
               })}
-              {latestStats && (
+              {latestPlayerStats && (
                 <span className="ml-2">
-                  · {latestStats.scoreToPar > 0 ? '+' : ''}
-                  {latestStats.scoreToPar}
+                  {activeRound.gameMode === 'stableford'
+                    ? `${latestPlayerStats.stablefordTotal} pts`
+                    : `${latestPlayerStats.scoreToPar > 0 ? '+' : ''}${latestPlayerStats.scoreToPar}`
+                  }
                 </span>
               )}
             </p>
@@ -124,37 +190,88 @@ function HomeContent() {
           <div className="space-y-2">
             {recentRounds.map((round) => {
               const stats = getRoundStats(round.id);
+              const ps = stats?.playerStats?.[0];
+              const isDeleting = deleteConfirmId === round.id;
               return (
-                <Link
+                <div
                   key={round.id}
-                  href={`/round/${round.id}`}
-                  className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-3 transition-all active:scale-[0.98] dark:border-zinc-800 dark:bg-zinc-900"
+                  className="flex items-center gap-2"
                 >
-                  <div>
-                    <p className="text-sm font-bold">{round.courseName}</p>
-                    <p className="text-xs text-zinc-400">
-                      {new Date(round.date).toLocaleDateString()} ·{' '}
-                      {round.totalHoles} {t('home.holes')}
-                    </p>
-                  </div>
-                  {stats && (
-                    <div className="text-right">
-                      <p
-                        className={`text-lg font-bold ${
-                          stats.scoreToPar <= 0
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-rose-600 dark:text-rose-400'
-                        }`}
-                      >
-                        {stats.scoreToPar > 0 ? '+' : ''}
-                        {stats.scoreToPar}
-                      </p>
+                  <Link
+                    href={`/round/${round.id}`}
+                    className="flex flex-1 items-center justify-between rounded-xl border border-zinc-200 bg-white p-3 transition-all active:scale-[0.98] dark:border-zinc-800 dark:bg-zinc-900"
+                  >
+                    <div>
+                      <p className="text-sm font-bold">{round.courseName}</p>
                       <p className="text-xs text-zinc-400">
-                        {stats.totalScore}
+                        {new Date(round.date).toLocaleDateString()} ·{' '}
+                        {round.totalHoles} {t('home.holes')}
+                        {round.gameMode === 'stableford' && (
+                          <span className="ml-1 rounded bg-emerald-100 px-1 py-0.5 text-[9px] font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                            S
+                          </span>
+                        )}
                       </p>
                     </div>
-                  )}
-                </Link>
+                    {ps && (
+                      <div className="text-right">
+                        {round.gameMode === 'stableford' ? (
+                          <>
+                            <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                              {ps.stablefordTotal}
+                            </p>
+                            <p className="text-xs text-zinc-400">
+                              {t('scorecard.points')} · {ps.totalScore} {t('scorecard.score')}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p
+                              className={`text-lg font-bold ${
+                                ps.scoreToPar <= 0
+                                  ? 'text-emerald-600 dark:text-emerald-400'
+                                  : 'text-rose-600 dark:text-rose-400'
+                              }`}
+                            >
+                              {ps.scoreToPar > 0 ? '+' : ''}
+                              {ps.scoreToPar}
+                            </p>
+                            <p className="text-xs text-zinc-400">
+                              {ps.totalScore}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </Link>
+                  <motion.button
+                    onClick={() => {
+                      if (isDeleting) {
+                        heavyTap()
+                        deleteRound(round.id)
+                        setDeleteConfirmId(null)
+                      } else {
+                        mediumTap()
+                        setDeleteConfirmId(round.id)
+                      }
+                    }}
+                    onBlur={() => setDeleteConfirmId(null)}
+                    animate={isDeleting ? { scale: [1, 1.1, 1] } : {}}
+                    transition={{ duration: 0.3 }}
+                    className={`flex shrink-0 items-center justify-center rounded-xl p-3 transition-all ${
+                      isDeleting
+                        ? 'bg-rose-500 text-white shadow-sm'
+                        : 'text-zinc-300 hover:text-rose-400 dark:text-zinc-600'
+                    }`}
+                    title={isDeleting ? t('round.confirmDelete') : t('round.delete')}
+                  >
+                    {isDeleting ? (
+                      <span className="whitespace-nowrap text-xs font-bold">{t('round.confirmDelete')}</span>
+                    ) : (
+                      <Trash2 size={18} />
+                    )}
+                  </motion.button>
+                </div>
               );
             })}
           </div>

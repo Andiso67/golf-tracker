@@ -13,7 +13,7 @@ function NewRoundContent() {
   const { t } = useTranslation();
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-6">
+    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)]">
       <motion.div
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}

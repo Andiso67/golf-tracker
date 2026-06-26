@@ -14,11 +14,11 @@ export async function POST(
     return NextResponse.json({ error: 'Round not found' }, { status: 404 })
   }
 
-  const stats = calculateRoundStats(round.holes)
-  const hcp = Math.round((stats.scoreToPar * 0.96) * 10) / 10
+  const stats = calculateRoundStats(round.players, round.gameMode)
+  const hcp = Math.round(((stats.playerStats[0]?.scoreToPar || 0) * 0.96) * 10) / 10
 
   await completeRound(id)
-  await addHandicapEntry(round.playerId, hcp, new Date(round.date))
+  await addHandicapEntry(round.players[0]?.playerId || 'local', hcp, new Date(round.date))
 
   return NextResponse.json({ success: true })
 }

@@ -3,16 +3,17 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Plus, BarChart3, MapPin, User } from 'lucide-react';
+import { Home, Plus, BarChart3, Users, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/i18n/useTranslation';
+import { lightTap } from '@/lib/haptics';
 
 const navLinks = [
   { href: '/', icon: Home, key: 'nav.home' },
   { href: '/new-round', icon: Plus, key: 'nav.new' },
-  { href: '/courses', icon: MapPin, key: 'nav.courses' },
   { href: '/dashboard', icon: BarChart3, key: 'nav.stats' },
-  { href: '/profile', icon: User, key: 'nav.profile' },
+  { href: '/players', icon: Users, key: 'nav.players' },
+  { href: '/settings', icon: Settings, key: 'nav.settings' },
 ];
 
 function NavContent() {
@@ -29,7 +30,8 @@ function NavContent() {
           <Link
             key={href}
             href={href}
-            className="relative flex flex-col items-center gap-0.5 px-2 py-1"
+            onClick={lightTap}
+            className="relative flex min-h-[44px] flex-col items-center justify-center gap-0.5 px-3 transition-all active:scale-90"
           >
             {isActive && (
               <motion.div
@@ -39,7 +41,7 @@ function NavContent() {
               />
             )}
             <Icon
-              size={20}
+              size={22}
               className={
                 isActive
                   ? 'text-emerald-600 dark:text-emerald-400'
@@ -47,7 +49,7 @@ function NavContent() {
               }
             />
             <span
-              className={`text-[9px] font-medium ${
+              className={`text-[10px] font-medium ${
                 isActive
                   ? 'text-emerald-600 dark:text-emerald-400'
                   : 'text-zinc-400 dark:text-zinc-500'
@@ -64,8 +66,10 @@ function NavContent() {
 
 export default function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-200 bg-white/80 px-1 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-900/80">
-      <div className="mx-auto flex max-w-lg items-center justify-around py-1.5">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-200 bg-white/80 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
+      <div className="mx-auto flex max-w-lg items-center justify-around py-1">
         <Suspense fallback={null}>
           <NavContent />
         </Suspense>

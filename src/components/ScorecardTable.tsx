@@ -1,21 +1,27 @@
 'use client';
 
-import { HoleData } from '@/types';
+import { HoleData, stablefordPoints, type GameMode } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface ScorecardTableProps {
   holes: HoleData[];
   compact?: boolean;
+  gameMode?: GameMode;
 }
 
 export default function ScorecardTable({
   holes,
   compact = false,
+  gameMode = 'stroke-play',
 }: ScorecardTableProps) {
   const { t } = useTranslation();
   const totalPar = holes.reduce((s, h) => s + h.par, 0);
   const totalScore = holes.reduce(
     (s, h) => s + (h.score > 0 ? h.score : 0),
+    0
+  );
+  const totalStableford = holes.reduce(
+    (s, h) => s + stablefordPoints(h.score, h.par),
     0
   );
 
@@ -57,36 +63,52 @@ export default function ScorecardTable({
             </tr>
             <tr className="border-t border-zinc-100 dark:border-zinc-800">
               <td className="px-1.5 py-1 font-medium text-zinc-400">
-                {t('scorecard.you')}
+                {gameMode === 'stableford' ? t('scorecard.pts') : t('scorecard.you')}
               </td>
-              {holes.map((h) => (
-                <td
-                  key={h.number}
-                  className={`px-1.5 py-1 font-bold tabular-nums ${
-                    h.score > 0
-                      ? h.score < h.par
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : h.score === h.par
-                          ? 'text-zinc-800 dark:text-zinc-200'
-                          : 'text-rose-600 dark:text-rose-400'
-                      : 'text-zinc-300 dark:text-zinc-600'
-                  }`}
-                >
-                  {h.score > 0 ? h.score : '-'}
-                </td>
-              ))}
+              {holes.map((h) => {
+                const pts = stablefordPoints(h.score, h.par);
+                const display = gameMode === 'stableford'
+                  ? (h.score > 0 ? pts : '-')
+                  : (h.score > 0 ? h.score : '-');
+                const colorClass = gameMode === 'stableford'
+                  ? pts >= 3
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : pts === 2
+                      ? 'text-zinc-800 dark:text-zinc-200'
+                      : pts > 0
+                        ? 'text-amber-600 dark:text-amber-400'
+                        : 'text-zinc-300 dark:text-zinc-600'
+                  : h.score > 0
+                    ? h.score < h.par
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : h.score === h.par
+                        ? 'text-zinc-800 dark:text-zinc-200'
+                        : 'text-rose-600 dark:text-rose-400'
+                    : 'text-zinc-300 dark:text-zinc-600';
+                return (
+                  <td key={h.number} className={`px-1.5 py-1 font-bold tabular-nums ${colorClass}`}>
+                    {display}
+                  </td>
+                );
+              })}
               <td
                 className={`px-1.5 py-1 font-bold ${
                   totalScore > 0
-                    ? totalScore < totalPar
+                    ? gameMode === 'stableford'
                       ? 'text-emerald-600 dark:text-emerald-400'
-                      : totalScore === totalPar
-                        ? 'text-zinc-800 dark:text-zinc-200'
-                        : 'text-rose-600 dark:text-rose-400'
+                      : totalScore < totalPar
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : totalScore === totalPar
+                          ? 'text-zinc-800 dark:text-zinc-200'
+                          : 'text-rose-600 dark:text-rose-400'
                     : 'text-zinc-300 dark:text-zinc-600'
                 }`}
               >
-                {totalScore > 0 ? totalScore : '-'}
+                {totalScore > 0
+                  ? gameMode === 'stableford'
+                    ? totalStableford
+                    : totalScore
+                  : '-'}
               </td>
             </tr>
           </tbody>
@@ -109,6 +131,11 @@ export default function ScorecardTable({
             <th className="px-2 py-2 font-medium text-zinc-400">
               {t('scorecard.score')}
             </th>
+            {gameMode === 'stableford' && (
+              <th className="px-2 py-2 font-medium text-zinc-400">
+                {t('scorecard.pts')}
+              </th>
+            )}
             <th className="px-2 py-2 font-medium text-zinc-400">
               {t('scorecard.fw')}
             </th>
@@ -149,6 +176,11 @@ export default function ScorecardTable({
               >
                 {h.score > 0 ? h.score : '-'}
               </td>
+              {gameMode === 'stableford' && (
+                <td className="px-2 py-2 font-bold tabular-nums">
+                  {h.score > 0 ? stablefordPoints(h.score, h.par) : '-'}
+                </td>
+              )}
               <td className="px-2 py-2">
                 <span
                   className={`inline-block h-5 w-5 rounded-full text-[10px] font-bold leading-5 ${

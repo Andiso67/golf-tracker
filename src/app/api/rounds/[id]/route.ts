@@ -18,6 +18,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  const round = await getRound(id)
+  if (!round) {
+    return NextResponse.json({ error: 'Round not found' }, { status: 404 })
+  }
   await deleteRound(id)
   return NextResponse.json({ success: true })
 }

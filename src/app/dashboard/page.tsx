@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendingUp,
@@ -8,6 +8,7 @@ import {
   Flag,
   CircleDot,
   BarChart3,
+  Trash2,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import BottomNav from '@/components/BottomNav';
@@ -15,6 +16,7 @@ import StatsCard from '@/components/StatsCard';
 import { useStore } from '@/store/useStore';
 import { calculateRoundStats } from '@/lib/stats';
 import { useTranslation } from '@/i18n/useTranslation';
+import { mediumTap, heavyTap } from '@/lib/haptics';
 
 const LineChart = dynamic(
   () => import('recharts').then((mod) => mod.LineChart),
@@ -52,7 +54,9 @@ export default function DashboardPage() {
   const rounds = useStore((s) => s.rounds);
   const handicapHistory = useStore((s) => s.handicapHistory);
   const language = useStore((s) => s.language);
+  const deleteRound = useStore((s) => s.deleteRound);
   const { t } = useTranslation();
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const completedRounds = rounds
     .filter((r) => r.completed)
@@ -65,17 +69,18 @@ export default function DashboardPage() {
 
   const chartData = useMemo(() => {
     return completedRounds.map((round) => {
-      const stats = calculateRoundStats(round.holes);
+      const stats = calculateRoundStats(round.players, round.gameMode);
+      const ps = stats.playerStats[0] || { scoreToPar: 0, totalScore: 0, girPercentage: 0, avgPutts: 0, fairwaysPercentage: 0 };
       return {
         date: new Date(round.date).toLocaleDateString(locale, {
           month: 'short',
           day: 'numeric',
         }),
-        scoreToPar: stats.scoreToPar,
-        totalScore: stats.totalScore,
-        girPercentage: stats.girPercentage,
-        putts: stats.avgPutts,
-        fairwaysPercentage: stats.fairwaysPercentage,
+        scoreToPar: ps.scoreToPar,
+        totalScore: ps.totalScore,
+        girPercentage: ps.girPercentage,
+        putts: ps.avgPutts,
+        fairwaysPercentage: ps.fairwaysPercentage,
         label: round.courseName.slice(0, 10),
       };
     });
@@ -93,7 +98,10 @@ export default function DashboardPage() {
 
   const avgStats = useMemo(() => {
     if (completedRounds.length === 0) return null;
-    const allStats = completedRounds.map((r) => calculateRoundStats(r.holes));
+    const allStats = completedRounds.map((r) => {
+      const s = calculateRoundStats(r.players, r.gameMode);
+      return s.playerStats[0] || { totalScore: 0, girPercentage: 0, avgPutts: 0, fairwaysPercentage: 0, scoreToPar: 0 };
+    });
     return {
       avgScore: Math.round(
         allStats.reduce((s, st) => s + st.totalScore, 0) / allStats.length
@@ -115,7 +123,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-6">
+      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)]">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -393,9 +401,10 @@ export default function DashboardPage() {
                   const keys = ['<1', '1-2', '2-4', '4-8', '+8'] as const;
                   const totals: Record<typeof keys[number], number> = { '<1': 0, '1-2': 0, '2-4': 0, '4-8': 0, '+8': 0 };
                   for (const r of completedRounds) {
-                    const s = calculateRoundStats(r.holes);
+                    const s = calculateRoundStats(r.players, r.gameMode);
+                    const ps = s.playerStats[0] || { puttsByDistance: { '<1': 0, '1-2': 0, '2-4': 0, '4-8': 0, '+8': 0 } };
                     for (const k of keys) {
-                      totals[k] += s.puttsByDistance[k];
+                      totals[k] += ps.puttsByDistance[k];
                     }
                   }
                   const max = Math.max(...Object.values(totals), 1);
@@ -432,36 +441,69 @@ export default function DashboardPage() {
                   .slice()
                   .reverse()
                   .map((round) => {
-                    const stats = calculateRoundStats(round.holes);
+                    const stats = calculateRoundStats(round.players, round.gameMode);
+                    const ps = stats.playerStats[0] || { scoreToPar: 0, totalScore: 0, girPercentage: 0, avgPutts: 0, fairwaysPercentage: 0 };
+                    const isDeleting = deleteConfirmId === round.id;
                     return (
                       <div
                         key={round.id}
-                        className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
+                        className="flex items-center gap-2"
                       >
-                        <div>
-                          <p className="text-sm font-bold">
-                            {round.courseName}
-                          </p>
-                          <p className="text-xs text-zinc-400">
-                            {new Date(round.date).toLocaleDateString()} ·{' '}
-                            {round.teeColor}
-                          </p>
+                        <div
+                          className="flex flex-1 items-center justify-between rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
+                        >
+                          <div>
+                            <p className="text-sm font-bold">
+                              {round.courseName}
+                            </p>
+                            <p className="text-xs text-zinc-400">
+                              {new Date(round.date).toLocaleDateString()} ·{' '}
+                              {round.teeColor}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-4 text-xs">
+                            <span className="text-zinc-400">
+                              {ps.girPercentage}% GIR
+                            </span>
+                            <span
+                              className={`text-lg font-bold ${
+                                ps.scoreToPar <= 0
+                                  ? 'text-emerald-600 dark:text-emerald-400'
+                                  : 'text-rose-600 dark:text-rose-400'
+                              }`}
+                            >
+                              {ps.scoreToPar > 0 ? '+' : ''}
+                              {ps.scoreToPar}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-4 text-xs">
-                          <span className="text-zinc-400">
-                            {stats.girPercentage}% GIR
-                          </span>
-                          <span
-                            className={`text-lg font-bold ${
-                              stats.scoreToPar <= 0
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : 'text-rose-600 dark:text-rose-400'
-                            }`}
-                          >
-                            {stats.scoreToPar > 0 ? '+' : ''}
-                            {stats.scoreToPar}
-                          </span>
-                        </div>
+                        <motion.button
+                          onClick={() => {
+                            if (isDeleting) {
+                              heavyTap()
+                              deleteRound(round.id)
+                              setDeleteConfirmId(null)
+                            } else {
+                              mediumTap()
+                              setDeleteConfirmId(round.id)
+                            }
+                          }}
+                          onBlur={() => setDeleteConfirmId(null)}
+                          animate={isDeleting ? { scale: [1, 1.1, 1] } : {}}
+                          transition={{ duration: 0.3 }}
+                          className={`flex shrink-0 items-center justify-center rounded-xl p-3 transition-all ${
+                            isDeleting
+                              ? 'bg-rose-500 text-white shadow-sm'
+                              : 'text-zinc-300 hover:text-rose-400 dark:text-zinc-600'
+                          }`}
+                          title={isDeleting ? t('round.confirmDelete') : t('round.delete')}
+                        >
+                          {isDeleting ? (
+                            <span className="whitespace-nowrap text-xs font-bold">{t('round.confirmDelete')}</span>
+                          ) : (
+                            <Trash2 size={18} />
+                          )}
+                        </motion.button>
                       </div>
                     );
                   })}

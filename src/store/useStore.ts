@@ -21,15 +21,21 @@ function generateId(): string {
 }
 
 import {
+  User,
   Player,
   Round,
   HoleData,
   SavedCourse,
   CourseTee,
+  RoundPlayer,
   createEmptyHole,
   DEFAULT_PARS_18,
   DEFAULT_PARS_9,
   HandicapEntry,
+  GameMode,
+  isTeamMode,
+  playerFullName,
+  AuthState,
 } from '@/types';
 import { calculateRoundStats } from '@/lib/stats';
 
@@ -37,6 +43,8 @@ export type Language = 'en' | 'es';
 
 interface GolfStore {
   player: Player | null;
+  players: Player[];
+  activePlayerId: string | null;
   rounds: Round[];
   courses: SavedCourse[];
   handicapHistory: HandicapEntry[];
@@ -44,13 +52,24 @@ interface GolfStore {
   language: Language;
   _hydrated: boolean;
   _syncing: boolean;
+  auth: AuthState;
+  userEmail: string;
+  userEmailVerified: string | null;
 
   setPlayer: (player: Player) => void;
   updatePlayer: (data: Partial<Player>) => void;
   setLanguage: (lang: Language) => void;
+  addPlayer: (firstName: string, lastName1?: string, lastName2?: string, licenseNumber?: string) => string;
+  setActivePlayer: (id: string) => void;
+  deletePlayer: (id: string) => void;
 
   syncFromApi: () => Promise<void>;
   syncPlayerToApi: (player: Player) => Promise<void>;
+
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (data: { firstName: string; lastName1?: string; lastName2?: string; email: string; password: string; handicap?: number; homeCourse?: string }) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
 
   addCourse: (name: string, tees: CourseTee[]) => string;
   updateCourse: (id: string, data: Partial<SavedCourse>) => void;
@@ -63,22 +82,42 @@ interface GolfStore {
     teeColor: string,
     totalHoles: 9 | 18,
     customPars?: number[],
-    courseId?: string
+    courseId?: string,
+    gameMode?: GameMode,
+    selectedPlayers?: Player[]
   ) => string;
   getActiveRound: () => Round | undefined;
-  updateHole: (roundId: string, holeNumber: number, data: Partial<HoleData>) => void;
+  updateHole: (roundId: string, holeNumber: number, data: Partial<HoleData>, playerIndex?: number) => void;
   completeRound: (roundId: string) => void;
   syncCompleteRound: (roundId: string) => Promise<void>;
+  updateRoundDate: (roundId: string, date: string) => void;
+  updateRoundCourse: (roundId: string, courseName: string) => void;
   deleteRound: (roundId: string) => void;
 
   getRoundStats: (roundId: string) => ReturnType<typeof calculateRoundStats> | null;
   getAllRounds: () => Round[];
 }
 
+function getStoredSession(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('golf-tracker-session')
+}
+
+function storeSession(token: string | null) {
+  if (typeof window === 'undefined') return
+  if (token) {
+    localStorage.setItem('golf-tracker-session', token)
+  } else {
+    localStorage.removeItem('golf-tracker-session')
+  }
+}
+
 export const useStore = create<GolfStore>()(
   persist(
     (set, get) => ({
       player: null,
+      players: [],
+      activePlayerId: null,
       rounds: [],
       courses: [],
       handicapHistory: [],
@@ -86,15 +125,204 @@ export const useStore = create<GolfStore>()(
       language: 'en' as Language,
       _hydrated: false,
       _syncing: false,
+      auth: {
+        isLoggedIn: false,
+        sessionToken: null,
+        currentUserId: null,
+      },
+      userEmail: '',
+      userEmailVerified: null,
 
-      setPlayer: (player) => set({ player }),
+      setPlayer: (player) =>
+        set((state) => {
+          const exists = state.players.find((p) => p.id === player.id);
+          const players = exists
+            ? state.players.map((p) => (p.id === player.id ? player : p))
+            : [...state.players, player];
+          return { player, players, activePlayerId: player.id };
+        }),
 
       updatePlayer: (data) =>
-        set((state) => ({
-          player: state.player ? { ...state.player, ...data } : null,
-        })),
+        set((state) => {
+          if (!state.player) return {};
+          const updated = { ...state.player, ...data };
+          return {
+            player: updated,
+            players: state.players.map((p) =>
+              p.id === state.player!.id ? updated : p
+            ),
+          };
+        }),
 
       setLanguage: (language) => set({ language }),
+
+      addPlayer: (firstName: string, lastName1?: string, lastName2?: string, licenseNumber?: string) => {
+        const id = generateId();
+        const newPlayer: Player = {
+          id,
+          firstName,
+          lastName1: lastName1 || '',
+          lastName2: lastName2 || '',
+          handicap: 0,
+          homeCourse: '',
+          licenseNumber: licenseNumber || '',
+        };
+        set((state) => ({
+          players: [...state.players, newPlayer],
+          player: state.players.length === 0 ? newPlayer : state.player,
+          activePlayerId:
+            state.players.length === 0 ? id : state.activePlayerId,
+        }));
+        return id;
+      },
+
+      setActivePlayer: (id) =>
+        set((state) => {
+          const p = state.players.find((pl) => pl.id === id);
+          return p ? { player: p, activePlayerId: id } : {};
+        }),
+
+      deletePlayer: (id) =>
+        set((state) => {
+          const remaining = state.players.filter((p) => p.id !== id);
+          if (state.activePlayerId === id) {
+            const next = remaining[0] || null;
+            return {
+              players: remaining,
+              player: next,
+              activePlayerId: next?.id || null,
+            };
+          }
+          return { players: remaining };
+        }),
+
+      login: async (email, password) => {
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+          })
+          const data = await res.json()
+          if (!res.ok) {
+            return { success: false, error: data.error || 'Login failed' }
+          }
+          storeSession(data.sessionToken)
+          set({
+            auth: {
+              isLoggedIn: true,
+              sessionToken: data.sessionToken,
+              currentUserId: data.userId,
+            },
+            player: {
+              id: data.playerId,
+              userId: data.userId,
+              firstName: data.firstName,
+              lastName1: data.lastName1 || '',
+              lastName2: data.lastName2 || '',
+              handicap: 0,
+              homeCourse: '',
+              licenseNumber: '',
+            },
+            userEmail: data.email,
+            userEmailVerified: data.emailVerified || null,
+          })
+          return { success: true }
+        } catch {
+          return { success: false, error: 'Network error' }
+        }
+      },
+
+      register: async (data) => {
+        try {
+          const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          })
+          const result = await res.json()
+          if (!res.ok) {
+            return { success: false, error: result.error || 'Registration failed' }
+          }
+          storeSession(result.sessionToken)
+          set({
+            auth: {
+              isLoggedIn: true,
+              sessionToken: result.sessionToken,
+              currentUserId: result.userId,
+            },
+            player: {
+              id: result.playerId,
+              userId: result.userId,
+              firstName: result.firstName,
+              lastName1: result.lastName1 || '',
+              lastName2: result.lastName2 || '',
+              handicap: 0,
+              homeCourse: '',
+              licenseNumber: '',
+            },
+            userEmail: result.email,
+            userEmailVerified: result.emailVerified || null,
+          })
+          return { success: true }
+        } catch {
+          return { success: false, error: 'Network error' }
+        }
+      },
+
+      logout: async () => {
+        const token = get().auth.sessionToken
+        try {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionToken: token }),
+          })
+        } catch {}
+        storeSession(null)
+        set({
+          auth: { isLoggedIn: false, sessionToken: null, currentUserId: null },
+          player: null,
+          userEmail: '',
+          userEmailVerified: null,
+        })
+      },
+
+      checkAuth: async () => {
+        const token = getStoredSession()
+        if (!token) {
+          set({ auth: { isLoggedIn: false, sessionToken: null, currentUserId: null } })
+          return
+        }
+        try {
+          const res = await fetch('/api/auth/me', {
+            headers: { authorization: `Bearer ${token}` },
+          })
+          if (!res.ok) {
+            storeSession(null)
+            set({ auth: { isLoggedIn: false, sessionToken: null, currentUserId: null } })
+            return
+          }
+          const data = await res.json()
+          set({
+            auth: { isLoggedIn: true, sessionToken: token, currentUserId: data.userId },
+            player: {
+              id: data.playerId,
+              userId: data.userId,
+              firstName: data.firstName,
+              lastName1: data.lastName1 || '',
+              lastName2: data.lastName2 || '',
+              handicap: 0,
+              homeCourse: '',
+              licenseNumber: '',
+            },
+            userEmail: data.email,
+            userEmailVerified: data.emailVerified || null,
+          })
+        } catch {
+          // offline — keep current state
+        }
+      },
 
       syncFromApi: async () => {
         set({ _syncing: true });
@@ -244,7 +472,8 @@ export const useStore = create<GolfStore>()(
         return imported;
       },
 
-      startRound: (courseName, teeColor, totalHoles, customPars, courseId) => {
+      startRound: (courseName, teeColor, totalHoles, customPars, courseId, gameMode, selectedPlayers) => {
+        const mode = gameMode || 'stroke-play';
         const pars =
           customPars ||
           (totalHoles === 9 ? DEFAULT_PARS_9 : DEFAULT_PARS_18);
@@ -253,15 +482,33 @@ export const useStore = create<GolfStore>()(
         );
         const id = generateId();
         const now = new Date().toISOString();
+
+        const players = get().players;
+        const active = get().player;
+        const playersForRound: RoundPlayer[] = selectedPlayers && selectedPlayers.length > 0
+          ? selectedPlayers.map((p) => ({
+              playerId: p.id,
+              playerName: playerFullName(p),
+              handicap: p.handicap,
+              holes: holes.map((h) => ({ ...h })),
+              team: isTeamMode(mode) ? undefined : undefined,
+            }))
+          : [{
+              playerId: active?.id || 'local',
+              playerName: active ? playerFullName(active) : 'Player',
+              handicap: active?.handicap || 0,
+              holes: holes.map((h) => ({ ...h })),
+            }];
+
         const round: Round = {
           id,
-          playerId: get().player?.id || 'local',
+          players: playersForRound,
           courseName,
           courseId,
           teeColor,
+          gameMode: mode,
           date: now,
           totalHoles,
-          holes,
           completed: false,
         };
         set((state) => ({
@@ -273,12 +520,13 @@ export const useStore = create<GolfStore>()(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            playerId: round.playerId,
+            players: playersForRound,
             courseName,
             courseId,
             teeColor,
             totalHoles,
-            holes,
+            holes: playersForRound[0].holes,
+            gameMode: mode,
           }),
         }).then(async (res) => {
           if (res.ok) {
@@ -299,14 +547,21 @@ export const useStore = create<GolfStore>()(
         return rounds.find((r) => r.id === activeRoundId);
       },
 
-      updateHole: (roundId, holeNumber, data) =>
+      updateHole: (roundId, holeNumber, data, playerIndex = 0) =>
         set((state) => ({
           rounds: state.rounds.map((r) =>
             r.id === roundId
               ? {
                   ...r,
-                  holes: r.holes.map((h) =>
-                    h.number === holeNumber ? { ...h, ...data } : h
+                  players: r.players.map((p, i) =>
+                    i === playerIndex
+                      ? {
+                          ...p,
+                          holes: p.holes.map((h) =>
+                            h.number === holeNumber ? { ...h, ...data } : h
+                          ),
+                        }
+                      : p
                   ),
                 }
               : r
@@ -318,7 +573,8 @@ export const useStore = create<GolfStore>()(
         const round = rounds.find((r) => r.id === roundId);
         if (!round) return;
 
-        const stats = calculateRoundStats(round.holes);
+        const stats = calculateRoundStats(round.players, round.gameMode);
+        const firstPlayerScore = stats.playerStats[0]?.scoreToPar || 0;
 
         set((state) => ({
           rounds: state.rounds.map((r) =>
@@ -330,7 +586,7 @@ export const useStore = create<GolfStore>()(
             ...state.handicapHistory,
             {
               date: round.date,
-              handicap: calculateHandicap(stats.scoreToPar),
+              handicap: calculateHandicap(firstPlayerScore),
             },
           ],
         }));
@@ -347,7 +603,8 @@ export const useStore = create<GolfStore>()(
             const { rounds } = get()
             const round = rounds.find((r) => r.id === roundId)
             if (round) {
-              const stats = calculateRoundStats(round.holes)
+              const stats = calculateRoundStats(round.players, round.gameMode)
+              const firstPlayerScore = stats.playerStats[0]?.scoreToPar || 0
               set((state) => ({
                 rounds: state.rounds.map((r) =>
                   r.id === roundId ? { ...r, completed: true } : r
@@ -358,7 +615,7 @@ export const useStore = create<GolfStore>()(
                   ...state.handicapHistory,
                   {
                     date: round.date,
-                    handicap: calculateHandicap(stats.scoreToPar),
+                    handicap: calculateHandicap(firstPlayerScore),
                   },
                 ],
               }))
@@ -369,17 +626,33 @@ export const useStore = create<GolfStore>()(
         }
       },
 
-      deleteRound: (roundId) =>
+      updateRoundDate: (roundId, date) =>
+        set((state) => ({
+          rounds: state.rounds.map((r) =>
+            r.id === roundId ? { ...r, date } : r
+          ),
+        })),
+
+      updateRoundCourse: (roundId, courseName) =>
+        set((state) => ({
+          rounds: state.rounds.map((r) =>
+            r.id === roundId ? { ...r, courseName } : r
+          ),
+        })),
+
+      deleteRound: (roundId) => {
         set((state) => ({
           rounds: state.rounds.filter((r) => r.id !== roundId),
           activeRoundId:
             state.activeRoundId === roundId ? null : state.activeRoundId,
-        })),
+        }))
+        fetch(`/api/rounds/${roundId}`, { method: 'DELETE' }).catch(() => {})
+      },
 
       getRoundStats: (roundId) => {
         const round = get().rounds.find((r) => r.id === roundId);
         if (!round) return null;
-        return calculateRoundStats(round.holes);
+        return calculateRoundStats(round.players, round.gameMode);
       },
 
       getAllRounds: () => get().rounds,
@@ -389,6 +662,26 @@ export const useStore = create<GolfStore>()(
       storage: createJSONStorage(() => ssrSafeStorage),
       onRehydrateStorage: () => (state) => {
         if (state) {
+          // Migrate single player
+          if (state.player && state.players.length === 0) {
+            state.players = [state.player];
+            state.activePlayerId = state.player.id;
+          }
+          // Migrate old-format rounds (single playerId + holes) to new format (players[])
+          for (const round of state.rounds) {
+            if (!('players' in round)) {
+              const old = round as any;
+              (round as any).players = [{
+                playerId: old.playerId || 'local',
+                playerName: (() => {
+                  const found = state.players?.find((p: Player) => p.id === old.playerId);
+                  return found ? playerFullName(found) : old.playerId || 'Player';
+                })(),
+                handicap: state.player?.handicap || 0,
+                holes: old.holes || [],
+              }];
+            }
+          }
           state._hydrated = true;
           if (typeof window !== 'undefined') {
             state.syncFromApi()

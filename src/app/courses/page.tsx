@@ -103,7 +103,7 @@ function CourseEditor({
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-6">
+    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)]">
       <div className="mb-4 flex items-center justify-between">
         <button
           onClick={onDone}
@@ -196,6 +196,7 @@ function CourseEditor({
                   </label>
                   <input
                     type="number"
+                    inputMode="decimal"
                     step="0.1"
                     value={tee.rating}
                     onChange={(e) =>
@@ -210,6 +211,7 @@ function CourseEditor({
                   </label>
                   <input
                     type="number"
+                    inputMode="numeric"
                     value={tee.slope}
                     onChange={(e) =>
                       handleSlopeChange(ti, parseInt(e.target.value) || 0)
@@ -235,6 +237,7 @@ function CourseEditor({
                     <span className="text-[9px] text-zinc-400">{hi + 1}</span>
                     <input
                       type="number"
+                      inputMode="numeric"
                       min={3}
                       max={6}
                       value={par}
@@ -302,7 +305,7 @@ function CoursesList() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-6">
+    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)]">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}

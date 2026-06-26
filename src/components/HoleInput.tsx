@@ -2,24 +2,27 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Minus, Plus, Crosshair, GripHorizontal } from 'lucide-react';
+import { Check, Minus, Plus, Crosshair, GripHorizontal, ArrowLeft, ArrowRight, Target } from 'lucide-react';
 import { HoleData } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
+import { mediumTap } from '@/lib/haptics';
 
 interface HoleInputProps {
   hole: HoleData;
   onSave: (data: Partial<HoleData>) => void;
 }
 
-type FairwayOption = 'Yes' | 'No' | 'Left' | 'Right';
+type FairwayOption = 'Fairway' | 'Left' | 'Right';
 
 export default function HoleInput({ hole, onSave }: HoleInputProps) {
   const { t } = useTranslation();
 
-  const [score, setScore] = useState(hole.score || 0);
-  const [fairwayHit, setFairwayHit] = useState<FairwayOption | null>(
-    hole.fairwayHit as FairwayOption | null
-  );
+  const [score, setScore] = useState(hole.score > 0 ? hole.score : hole.par);
+  const [fairwayHit, setFairwayHit] = useState<FairwayOption | null>(() => {
+    if (hole.fairwayHit === 'Yes') return 'Fairway';
+    if (hole.fairwayHit === 'Left' || hole.fairwayHit === 'Right') return hole.fairwayHit;
+    return null;
+  });
   const [gir, setGir] = useState<boolean | null>(hole.gir);
   const [putts, setPutts] = useState(hole.putts || 0);
   const [puttDistance, setPuttDistance] = useState<HoleData['puttDistance']>(hole.puttDistance);
@@ -49,9 +52,11 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
   );
 
   const handleSave = () => {
+    mediumTap();
+    const mappedFairway: HoleData['fairwayHit'] = fairwayHit === 'Fairway' ? 'Yes' : fairwayHit;
     onSave({
       score,
-      fairwayHit,
+      fairwayHit: mappedFairway,
       gir,
       putts,
       puttDistance,
@@ -64,7 +69,6 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
   };
 
   const canSave = score > 0;
-  const showDirection = fairwayHit !== null && fairwayHit !== 'Yes';
 
   return (
     <div className="space-y-4 rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-900">
@@ -75,6 +79,11 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
           </p>
           <p className="text-sm text-zinc-500">
             {t('holeInput.par', { par: hole.par })}
+            {hole.handicap != null && (
+              <span className="ml-2 rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 dark:bg-zinc-800">
+                HCP {hole.handicap}
+              </span>
+            )}
           </p>
         </div>
         <AnimatePresence>
@@ -116,62 +125,44 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-zinc-500">
+        <label className="mb-2 block text-xs font-medium text-zinc-500">
           {t('holeInput.fairwayHit')}
         </label>
-        <div className="flex gap-1.5">
+        <div className="grid grid-cols-3 gap-2">
           <button
-            onClick={() => handleFairwayTap('Yes')}
-            className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all active:scale-95 ${
-              fairwayHit === 'Yes'
-                ? 'bg-emerald-500 text-white'
-                : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800'
+            onClick={() => handleFairwayTap('Left')}
+            className={`flex flex-col items-center gap-1.5 rounded-xl py-3 text-xs font-medium transition-all active:scale-95 ${
+              fairwayHit === 'Left'
+                ? 'bg-amber-500 text-white shadow-sm'
+                : 'border border-zinc-200 bg-white text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800'
             }`}
           >
-            {t('holeInput.hit')}
+            <ArrowLeft size={22} className={fairwayHit === 'Left' ? 'text-white' : 'text-amber-400'} />
+            {t('holeInput.left')}
           </button>
           <button
-            onClick={() => handleFairwayTap('No')}
-            className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all active:scale-95 ${
-              fairwayHit === 'No' || fairwayHit === 'Left' || fairwayHit === 'Right'
-                ? 'bg-rose-500 text-white'
-                : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800'
+            onClick={() => handleFairwayTap('Fairway')}
+            className={`flex flex-col items-center gap-1.5 rounded-xl py-3 text-xs font-medium transition-all active:scale-95 ${
+              fairwayHit === 'Fairway'
+                ? 'bg-emerald-500 text-white shadow-sm'
+                : 'border border-zinc-200 bg-white text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800'
             }`}
           >
-            {t('holeInput.miss')}
+            <Target size={22} className={fairwayHit === 'Fairway' ? 'text-white' : 'text-emerald-400'} />
+            {t('holeInput.fairway')}
+          </button>
+          <button
+            onClick={() => handleFairwayTap('Right')}
+            className={`flex flex-col items-center gap-1.5 rounded-xl py-3 text-xs font-medium transition-all active:scale-95 ${
+              fairwayHit === 'Right'
+                ? 'bg-amber-500 text-white shadow-sm'
+                : 'border border-zinc-200 bg-white text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800'
+            }`}
+          >
+            <ArrowRight size={22} className={fairwayHit === 'Right' ? 'text-white' : 'text-amber-400'} />
+            {t('holeInput.right')}
           </button>
         </div>
-        <AnimatePresence>
-          {showDirection && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="mt-1.5 flex gap-1.5 overflow-hidden"
-            >
-              <button
-                onClick={() => handleFairwayTap('Left')}
-                className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all active:scale-95 ${
-                  fairwayHit === 'Left'
-                    ? 'bg-amber-500 text-white'
-                    : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800'
-                }`}
-              >
-                {t('holeInput.left')}
-              </button>
-              <button
-                onClick={() => handleFairwayTap('Right')}
-                className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all active:scale-95 ${
-                  fairwayHit === 'Right'
-                    ? 'bg-amber-500 text-white'
-                    : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800'
-                }`}
-              >
-                {t('holeInput.right')}
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       <div className="flex gap-3">
@@ -326,6 +317,8 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
             </label>
             <input
               type="number"
+              inputMode="numeric"
+              autoComplete="off"
               value={distance ?? ''}
               onChange={(e) =>
                 setDistance(e.target.value ? parseInt(e.target.value) : null)

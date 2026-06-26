@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db'
-import type { Round, HoleData } from '@/types'
+import type { Round, RoundPlayer, HoleData } from '@/types'
 import type { Prisma } from '@/generated/prisma/client'
 
 const puttDistanceToDb = {
@@ -73,22 +73,26 @@ export async function getRound(id: string): Promise<Round | null> {
 }
 
 export async function createRound(data: {
-  playerId: string
+  playerId?: string
+  players?: RoundPlayer[]
   courseName: string
   courseId?: string
   teeColor: string
   totalHoles: 9 | 18
-  holes: HoleData[]
+  holes?: HoleData[]
+  gameMode?: string
 }): Promise<Round> {
+  const firstPlayer = data.players?.[0];
   const round = await prisma.round.create({
     data: {
-      playerId: data.playerId,
+      playerId: firstPlayer?.playerId || data.playerId || 'local',
       courseName: data.courseName,
       courseId: data.courseId,
       teeColor: data.teeColor,
+      gameMode: data.gameMode || 'stroke-play',
       totalHoles: data.totalHoles,
       holes: {
-        create: data.holes.map(holeWithoutRound),
+        create: (firstPlayer?.holes || data.holes || []).map(holeWithoutRound),
       },
     },
     include: { holes: { orderBy: { number: 'asc' } } },
@@ -148,13 +152,26 @@ export async function getActiveRound(
 function mapRound(round: any): Round {
   return {
     id: round.id,
-    playerId: round.playerId,
+    players: round.players
+      ? round.players.map((p: any) => ({
+          playerId: p.playerId || p.id,
+          playerName: p.playerName || 'Player',
+          handicap: p.handicap || 0,
+          holes: (p.holes || round.holes || []).map(holeFromDb),
+          team: p.team,
+        }))
+      : [{
+          playerId: round.playerId || 'local',
+          playerName: 'Player',
+          handicap: 0,
+          holes: (round.holes || []).map(holeFromDb),
+        }],
     courseName: round.courseName,
     courseId: round.courseId ?? undefined,
     teeColor: round.teeColor,
+    gameMode: (round.gameMode as Round['gameMode']) || 'stroke-play',
     date: round.date.toISOString(),
     totalHoles: round.totalHoles as 9 | 18,
-    holes: round.holes.map(holeFromDb),
     completed: round.completed,
   }
 }
