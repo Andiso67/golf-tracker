@@ -42,29 +42,32 @@ function HomeContent() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-6 flex items-start justify-between"
       >
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+        <div className="flex items-center gap-3">
+          <img src="/icons/icon.svg" alt="18Stats" className="h-10 w-10" />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
             {player
               ? t('home.greeting', { name: playerFullName(player) })
               : t('home.appTitle')}
           </h1>
           <p className="text-sm text-zinc-500">
             {t('home.tagline')}
-          </p>
+            </p>
+          </div>
+          {auth.isLoggedIn && (
+            <button
+              onClick={async () => {
+                await logout();
+                router.push('/login');
+              }}
+              className="flex items-center gap-1 rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:border-zinc-700 dark:hover:bg-rose-950/30"
+              title={t('auth.logout')}
+            >
+              <LogOut size={14} />
+              {t('auth.logout')}
+            </button>
+          )}
         </div>
-        {auth.isLoggedIn && (
-          <button
-            onClick={async () => {
-              await logout();
-              router.push('/login');
-            }}
-            className="flex items-center gap-1 rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:border-zinc-700 dark:hover:bg-rose-950/30"
-            title={t('auth.logout')}
-          >
-            <LogOut size={14} />
-            {t('auth.logout')}
-          </button>
-        )}
       </motion.div>
 
       {syncStatus === 'checking' && (
