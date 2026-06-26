@@ -1,13 +1,19 @@
 {
-  "name": "Golf Tracker",
-  "short_name": "GolfTracker",
-  "description": "Track your golf rounds in real-time, on the course",
+  "name": "18Stats - Golf Tracker",
+  "short_name": "18Stats",
+  "description": "Track your golf rounds with handicap verification via RFEG",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fafafa",
   "theme_color": "#10b981",
   "orientation": "portrait",
   "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",

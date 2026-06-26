@@ -18,13 +18,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Golf Tracker',
+    title: '18Stats - Golf Tracker',
   description: 'Track your golf rounds in real-time',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Golf Tracker',
+  title: '18Stats - Golf Tracker',
   },
   icons: {
     apple: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   other: {
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'black-translucent',
-    'apple-mobile-web-app-title': 'Golf Tracker',
+    'apple-mobile-web-app-title': '18Stats',
     'mobile-web-app-capable': 'yes',
   },
 };
