@@ -1,36 +1,162 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 18Stats - Golf Tracker
 
-## Getting Started
+Seguimiento de rondas de golf con verificación de hándicap RFEG.
 
-First, run the development server:
+## Stack
+
+- **Frontend/Backend**: Next.js 16 (Turbopack)
+- **Base de datos**: PostgreSQL 16
+- **ORM**: Prisma 7
+- **Estilos**: Tailwind CSS 4
+- **Estado**: Zustand
+- **Proxy HTTPS**: Caddy 2 (Let's Encrypt automático)
+- **Contenedores**: Docker + Docker Compose
+
+## Requisitos locales
+
+- Node.js 22+
+- pnpm
+- PostgreSQL 16 (local o Docker)
+
+## Desarrollo local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Clonar
+git clone https://github.com/Andiso67/golf-tracker.git
+cd golf-tracker
+
+# Variables de entorno
+cp .env.example .env
+# Editar DATABASE_URL en .env
+
+# Instalar dependencias
+pnpm install
+
+# Preparar base de datos
+npx prisma migrate dev
+
+# Iniciar servidor de desarrollo
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Despliegue en AWS EC2 (Free Tier)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Crear instancia EC2
 
-## Learn More
+- AMI: Amazon Linux 2023
+- Tipo: t2.micro (free tier)
+- Storage: 20 GB gp2
+- Security Group:
+  - SSH (22) desde tu IP
+  - HTTP (80) desde 0.0.0.0/0
+  - HTTPS (443) desde 0.0.0.0/0
+- Key pair: crear o usar existente
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Conectar y preparar
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+chmod 400 ~/Downloads/tu-clave.pem
+ssh -i ~/Downloads/tu-clave.pem ec2-user@<IP_PUBLICA>
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Docker
+sudo dnf install -y docker
+sudo systemctl enable --now docker
+sudo usermod -aG docker ec2-user
 
-## Deploy on Vercel
+# Docker Compose plugin
+sudo dnf install -y docker-compose-plugin
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Cerrar sesión y volver a entrar
+exit
+ssh -i ~/Downloads/tu-clave.pem ec2-user@<IP_PUBLICA>
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 3. Clonar y desplegar
+
+```bash
+# Clonar (usando token de GitHub)
+git clone https://<TOKEN>@github.com/Andiso67/golf-tracker.git
+cd golf-tracker
+
+# Variables de producción
+cat > .env.production << 'EOF'
+DATABASE_URL=postgresql://golf:golf_dev@db:5432/golf_tracker?schema=public
+POSTGRES_USER=golf
+POSTGRES_PASSWORD=golf_dev
+POSTGRES_DB=golf_tracker
+EOF
+
+# Construir y arrancar
+sudo docker build --no-cache -t golf-tracker-app .
+sudo docker compose up -d
+```
+
+### 4. Dominio y HTTPS (DuckDNS + Caddy)
+
+1. Ir a https://duckdns.org
+2. Iniciar sesión con GitHub/Google
+3. Añadir dominio (ej: `18stats`)
+4. Introducir IP pública de la EC2 y hacer **Update IPv4**
+
+5. En la EC2, actualizar y desplegar:
+
+```bash
+cd ~/golf-tracker
+git pull
+sudo docker build --no-cache -t golf-tracker-app .
+sudo docker compose down
+sudo docker compose up -d
+```
+
+### 5. Comandos útiles
+
+```bash
+# Ver logs
+sudo docker compose logs -f
+
+# Ver estado
+sudo docker ps
+
+# Reiniciar Caddy
+sudo docker compose restart caddy
+
+# Reconstruir app
+sudo docker build --no-cache -t golf-tracker-app .
+sudo docker compose up -d
+```
+
+## Estructura del proyecto
+
+```
+├── prisma/              # Schema y migraciones
+├── public/              # Estáticos, manifest, SW
+├── src/
+│   ├── app/             # Páginas y API routes (Next.js App Router)
+│   │   ├── api/         # API routes (auth, rounds, courses, rfeg)
+│   │   └── round/[id]/  # Vista de ronda
+│   ├── components/      # Componentes React
+│   ├── hooks/           # Custom hooks
+│   ├── i18n/            # Traducciones EN/ES
+│   ├── lib/             # Lógica de negocio, servicios, stats
+│   ├── store/           # Zustand store
+│   └── types/           # Tipos TypeScript
+├── Dockerfile
+├── docker-compose.yml
+├── Caddyfile
+└── .env.production      # Variables de producción
+```
+
+## API endpoints
+
+| Ruta | Método | Descripción |
+|------|--------|-------------|
+| `/api/auth/login` | POST | Inicio de sesión |
+| `/api/auth/register` | POST | Registro |
+| `/api/auth/me` | GET | Perfil actual |
+| `/api/rounds` | GET/POST | Listar/crear rondas |
+| `/api/rounds/[id]/hole/[number]` | PATCH | Actualizar hoyo |
+| `/api/rounds/[id]/complete` | POST | Finalizar ronda |
+| `/api/rfeg/verify` | POST | Verificar licencia RFEG |
+| `/api/courses` | GET/POST | Listar/crear campos |
