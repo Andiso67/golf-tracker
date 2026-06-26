@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum FairwayHit {
+  Yes
+  No
+  Left
+  Right
+}
+
+enum PuttDistance {
+  LT_1
+  R_1_2
+  R_2_4
+  R_4_8
+  GT_8
+}
+
+model Player {
+  id          String   @id @default(cuid())
+  name        String
+  handicap    Float    @default(0)
+  homeCourse  String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rounds      Round[]
+  handicapHistory HandicapEntry[]
+}
+
+model Course {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  tees      Tee[]
+  rounds    Round[]
+}
+
+model Tee {
+  id        String @id @default(cuid())
+  courseId  String
+  name      String
+  rating    Float  @default(71.0)
+  slope     Int    @default(130)
+  totalHoles Int   @default(18)
+  pars      Int[]
+
+  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, name])
+}
+
+model Round {
+  id        String   @id @default(cuid())
+  playerId  String
+  courseId  String?
+  courseName String
+  teeColor  String
+  date      DateTime @default(now())
+  totalHoles Int     @default(18)
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  course    Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  holes     Hole[]
+}
+
+model Hole {
+  id        String      @id @default(cuid())
+  roundId   String
+  number    Int
+  par       Int         @default(4)
+  score     Int         @default(0)
+  fairwayHit FairwayHit?
+  gir       Boolean?
+  putts     Int         @default(0)
+  puttDistance PuttDistance?
+  penalties Int         @default(0)
+  sandSave  Boolean?
+  drivingDistance Int?
+
+  round     Round       @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  @@unique([roundId, number])
+}
+
+model HandicapEntry {
+  id        String   @id @default(cuid())
+  playerId  String
+  date      DateTime @default(now())
+  handicap  Float
+
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}

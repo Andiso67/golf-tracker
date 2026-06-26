@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: golf-tracker-db
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-golf}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: golf-tracker-app
+    restart: unless-stopped
+    ports:
+      - "80:3000"
+    env_file:
+      - .env.production
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
