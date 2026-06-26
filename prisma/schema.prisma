@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum FairwayHit {
@@ -22,16 +23,49 @@ enum PuttDistance {
   GT_8
 }
 
-model Player {
+model User {
   id          String   @id @default(cuid())
-  name        String
-  handicap    Float    @default(0)
-  homeCourse  String   @default("")
+  email       String   @unique
+  passwordHash String
+  firstName   String
+  lastName1   String   @default("")
+  lastName2   String   @default("")
+  emailVerified DateTime?
+  verificationToken String?
+  resetPasswordToken String?
+  resetPasswordExpires DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  player      Player?
+}
+
+model Player {
+  id          String   @id @default(cuid())
+  userId      String?  @unique
+  firstName   String
+  lastName1   String   @default("")
+  lastName2   String   @default("")
+  handicap    Float    @default(0)
+  homeCourse  String   @default("")
+  licenseNumber String @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   rounds      Round[]
   handicapHistory HandicapEntry[]
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  type      String   // EMAIL_VERIFICATION | PASSWORD_RESET
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email, type])
 }
 
 model Course {
@@ -63,6 +97,7 @@ model Round {
   courseId  String?
   courseName String
   teeColor  String
+  gameMode  String  @default("stroke-play")
   date      DateTime @default(now())
   totalHoles Int     @default(18)
   completed Boolean  @default(false)
