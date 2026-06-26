@@ -25,4 +25,4 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/next.config.ts ./
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy && npx next start -H 0.0.0.0 -p 3000"]
+CMD ["sh", "-c", "echo \"DATABASE_URL=$DATABASE_URL\" > .env && npx prisma migrate deploy && npx next start -H 0.0.0.0 -p 3000"]
