@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Flag, Mail, Lock, UserPlus, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Mail, Lock, UserPlus, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -84,13 +84,11 @@ export default function LoginPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-sm"
       >
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
-            <Flag size={28} className="text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            Golf Tracker
-          </h1>
+          <div className="mb-8 text-center">
+            <img src="/icons/icon.svg" alt="18Stats" className="mx-auto mb-4 h-20 w-20" />
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+              18Stats
+            </h1>
           <p className="mt-1 text-sm text-zinc-500">
             {mode === 'login' ? t('auth.login') : t('auth.register')}
           </p>
