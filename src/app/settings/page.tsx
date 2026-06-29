@@ -335,12 +335,6 @@ function SettingsContent() {
             </h2>
           </div>
           <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            {userEmail && (
-              <div className="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-500 dark:bg-zinc-800">
-                <Mail size={14} />
-                <span>{t('settings.linkedUser')}: <strong className="text-zinc-700 dark:text-zinc-300">{userEmail}</strong></span>
-              </div>
-            )}
             <div>
               <label className="mb-1 block text-sm font-medium text-zinc-500">
                 {t('profile.firstName')}
