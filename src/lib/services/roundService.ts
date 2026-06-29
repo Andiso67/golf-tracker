@@ -33,6 +33,7 @@ function holeWithoutRound(
       : null,
     penalties: h.penalties,
     sandSave: h.sandSave,
+    approach: h.approach,
     drivingDistance: h.drivingDistance,
   }
 }
@@ -50,6 +51,7 @@ function holeFromDb(h: any): HoleData {
       : null,
     penalties: h.penalties,
     sandSave: h.sandSave,
+    approach: h.approach,
     drivingDistance: h.drivingDistance,
   }
 }
@@ -117,6 +119,7 @@ export async function updateHole(
       : null
   if (data.penalties !== undefined) updateData.penalties = data.penalties
   if (data.sandSave !== undefined) updateData.sandSave = data.sandSave
+  if (data.approach !== undefined) updateData.approach = data.approach
   if (data.drivingDistance !== undefined)
     updateData.drivingDistance = data.drivingDistance
 

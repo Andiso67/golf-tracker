@@ -28,6 +28,7 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
   const [puttDistance, setPuttDistance] = useState<HoleData['puttDistance']>(hole.puttDistance);
   const [penalties, setPenalties] = useState(hole.penalties || 0);
   const [sandSave, setSandSave] = useState<number>(hole.sandSave ?? 0);
+  const [approach, setApproach] = useState<number>(hole.approach ?? 0);
   const [distance, setDistance] = useState<number | null>(hole.drivingDistance);
   const [showDistance, setShowDistance] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -62,6 +63,7 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
       puttDistance,
       penalties,
       sandSave,
+      approach,
       drivingDistance: distance,
     });
     setSaved(true);
@@ -210,6 +212,29 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
             </span>
             <button
               onClick={() => setSandSave(sandSave + 1)}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <label className="mb-1 block text-xs font-medium text-zinc-500">
+            {t('holeInput.approach')}
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setApproach(Math.max(0, approach - 1))}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
+            >
+              <Minus size={16} />
+            </button>
+            <span className="min-w-[2ch] text-center text-lg font-bold tabular-nums">
+              {approach}
+            </span>
+            <button
+              onClick={() => setApproach(approach + 1)}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
             >
               <Plus size={16} />

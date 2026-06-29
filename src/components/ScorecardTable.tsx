@@ -151,6 +151,9 @@ export default function ScorecardTable({
             <th className="px-2 py-2 font-medium text-zinc-400">
               {t('scorecard.sand')}
             </th>
+            <th className="px-2 py-2 font-medium text-zinc-400">
+              {t('scorecard.app')}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -232,6 +235,13 @@ export default function ScorecardTable({
               <td className="px-2 py-2 tabular-nums">
                 {h.sandSave > 0 ? (
                   <span className="text-amber-500 font-bold">{h.sandSave}</span>
+                ) : (
+                  <span className="text-zinc-300 dark:text-zinc-600">-</span>
+                )}
+              </td>
+              <td className="px-2 py-2 tabular-nums">
+                {h.approach > 0 ? (
+                  <span className="text-blue-500 font-bold">{h.approach}</span>
                 ) : (
                   <span className="text-zinc-300 dark:text-zinc-600">-</span>
                 )}

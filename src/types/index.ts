@@ -128,6 +128,7 @@ export interface HoleData {
   puttDistance: '<1' | '1-2' | '2-4' | '4-8' | '+8' | null;
   penalties: number;
   sandSave: number;
+  approach: number;
   drivingDistance: number | null;
 }
 
@@ -143,6 +144,7 @@ export function createEmptyHole(number: number, par: number = 4, handicap?: numb
     puttDistance: null,
     penalties: 0,
     sandSave: 0,
+    approach: 0,
     drivingDistance: null,
   };
 }
