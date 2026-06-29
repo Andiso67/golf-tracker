@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, User, Languages, Mail, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Save, User, Languages, Mail, ShieldCheck, ShieldAlert } from 'lucide-react';
+import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -67,6 +68,10 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-6"
         >
+          <Link href="/" className="mb-3 inline-flex items-center gap-1 text-sm text-zinc-400">
+            <ArrowLeft size={16} />
+            Back
+          </Link>
           <h1 className="text-2xl font-bold tracking-tight">
             {t('profile.title')}
           </h1>

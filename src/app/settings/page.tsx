@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  ArrowLeft,
   Save,
   Languages,
   User,
@@ -314,6 +315,10 @@ function SettingsContent() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-6"
       >
+        <Link href="/" className="mb-3 inline-flex items-center gap-1 text-sm text-zinc-400">
+          <ArrowLeft size={16} />
+          Back
+        </Link>
         <h1 className="text-2xl font-bold tracking-tight">
           {t('settings.title')}
         </h1>

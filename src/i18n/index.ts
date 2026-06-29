@@ -215,6 +215,7 @@ const en = {
   players: {
     title: 'Players',
     subtitle: 'Manage application users',
+    back: 'Back',
     activePlayer: 'Active Player',
     switchTo: 'Log in',
     switchToShort: 'Enter',
@@ -586,6 +587,7 @@ const es: typeof en = {
   players: {
     title: 'Jugadores',
     subtitle: 'Gestiona los usuarios de la aplicación',
+    back: 'Volver',
     activePlayer: 'Jugador Activo',
     switchTo: 'Iniciar sesión',
     switchToShort: 'Entrar',

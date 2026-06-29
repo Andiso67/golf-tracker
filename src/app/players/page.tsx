@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  ArrowLeft,
   User,
   Plus,
   Trash2,
@@ -154,13 +155,20 @@ export default function PlayersPage() {
 
   return (
     <>
-      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)]">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)]">
+      <motion.div
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="mb-6"
+      >
+        <Link
+          href="/"
+          className="mb-3 inline-flex items-center gap-1 text-sm text-zinc-400"
         >
-          <h1 className="text-2xl font-bold tracking-tight">
+          <ArrowLeft size={16} />
+          {t('players.back')}
+        </Link>
+        <h1 className="text-2xl font-bold tracking-tight">
             {t('players.title')}
           </h1>
           <p className="text-sm text-zinc-500">{t('players.subtitle')}</p>

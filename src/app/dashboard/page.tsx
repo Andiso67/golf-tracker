@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
+  ArrowLeft,
   TrendingUp,
   Target,
   Flag,
@@ -10,6 +11,7 @@ import {
   BarChart3,
   Trash2,
 } from 'lucide-react';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import BottomNav from '@/components/BottomNav';
 import StatsCard from '@/components/StatsCard';
@@ -129,6 +131,10 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-6"
         >
+          <Link href="/" className="mb-3 inline-flex items-center gap-1 text-sm text-zinc-400">
+            <ArrowLeft size={16} />
+            Back
+          </Link>
           <h1 className="text-2xl font-bold tracking-tight">
             {t('dashboard.title')}
           </h1>
