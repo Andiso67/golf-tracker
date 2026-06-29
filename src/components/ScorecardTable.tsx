@@ -229,17 +229,9 @@ export default function ScorecardTable({
                   '-'
                 )}
               </td>
-              <td className="px-2 py-2">
-                {h.sandSave !== null ? (
-                  <span
-                    className={`font-bold ${
-                      h.sandSave
-                        ? 'text-cyan-600 dark:text-cyan-400'
-                        : 'text-zinc-400 dark:text-zinc-500'
-                    }`}
-                  >
-                    {h.sandSave ? 'Y' : 'N'}
-                  </span>
+              <td className="px-2 py-2 tabular-nums">
+                {h.sandSave > 0 ? (
+                  <span className="text-amber-500 font-bold">{h.sandSave}</span>
                 ) : (
                   <span className="text-zinc-300 dark:text-zinc-600">-</span>
                 )}

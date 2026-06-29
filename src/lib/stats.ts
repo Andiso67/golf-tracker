@@ -28,8 +28,7 @@ function calculatePlayerStats(holes: HoleData[]): Omit<PlayerStats, 'playerId' |
     (h) => h.score <= h.par
   ).length;
 
-  const sandSaveHoles = played.filter((h) => h.sandSave !== null);
-  const sandSaves = sandSaveHoles.filter((h) => h.sandSave === true).length;
+  const totalBunker = played.reduce((sum, h) => sum + h.sandSave, 0);
 
   const totalPenalties = played.reduce((sum, h) => sum + h.penalties, 0);
 
@@ -70,12 +69,9 @@ function calculatePlayerStats(holes: HoleData[]): Omit<PlayerStats, 'playerId' |
       scramblingHoles.length > 0
         ? Math.round((scrambling / scramblingHoles.length) * 100)
         : 0,
-    sandSaves,
-    sandSavesTotal: sandSaveHoles.length,
-    sandSavePercentage:
-      sandSaveHoles.length > 0
-        ? Math.round((sandSaves / sandSaveHoles.length) * 100)
-        : 0,
+    sandSaves: totalBunker,
+    sandSavesTotal: totalBunker,
+    sandSavePercentage: 0,
     totalPenalties,
     puttsByDistance,
   };

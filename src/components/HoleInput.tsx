@@ -27,7 +27,7 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
   const [putts, setPutts] = useState(hole.putts || 0);
   const [puttDistance, setPuttDistance] = useState<HoleData['puttDistance']>(hole.puttDistance);
   const [penalties, setPenalties] = useState(hole.penalties || 0);
-  const [sandSave, setSandSave] = useState<boolean | null>(hole.sandSave);
+  const [sandSave, setSandSave] = useState<number>(hole.sandSave ?? 0);
   const [distance, setDistance] = useState<number | null>(hole.drivingDistance);
   const [showDistance, setShowDistance] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -198,30 +198,21 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
           <label className="mb-1 block text-xs font-medium text-zinc-500">
             {t('holeInput.sandSave')}
           </label>
-          <div className="flex gap-1.5">
+          <div className="flex items-center gap-2">
             <button
-              onClick={() =>
-                setSandSave(sandSave === true ? null : true)
-              }
-              className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all active:scale-95 ${
-                sandSave === true
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800'
-              }`}
+              onClick={() => setSandSave(Math.max(0, sandSave - 1))}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
             >
-              {t('holeInput.yes')}
+              <Minus size={16} />
             </button>
+            <span className="min-w-[2ch] text-center text-lg font-bold tabular-nums">
+              {sandSave}
+            </span>
             <button
-              onClick={() =>
-                setSandSave(sandSave === false ? null : false)
-              }
-              className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all active:scale-95 ${
-                sandSave === false
-                  ? 'bg-rose-500 text-white'
-                  : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800'
-              }`}
+              onClick={() => setSandSave(sandSave + 1)}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
             >
-              {t('holeInput.na')}
+              <Plus size={16} />
             </button>
           </div>
         </div>

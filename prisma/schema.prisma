@@ -119,7 +119,7 @@ model Hole {
   putts     Int         @default(0)
   puttDistance PuttDistance?
   penalties Int         @default(0)
-  sandSave  Boolean?
+  sandSave  Int     @default(0)
   drivingDistance Int?
 
   round     Round       @relation(fields: [roundId], references: [id], onDelete: Cascade)

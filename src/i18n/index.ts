@@ -123,7 +123,7 @@ const en = {
     gir: 'GIR',
     yes: 'Yes',
     no: 'No',
-    sandSave: 'Sand Save',
+    sandSave: 'Bunker',
     na: 'N/A',
     putts: 'Putts',
     penalties: 'Penalties',
@@ -167,7 +167,7 @@ const en = {
     fairways: 'Fairways',
     gir: 'GIR',
     scrambling: 'Scrambling',
-    sandSaves: 'Sand Saves',
+    sandSaves: 'Bunker',
     penalties: 'Penalties',
   },
   dashboard: {

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Hole" DROP COLUMN "sandSave",
+ADD COLUMN     "sandSave" INTEGER NOT NULL DEFAULT 0;
