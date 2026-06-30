@@ -40,7 +40,7 @@ interface AuthUser {
   createdAt: string;
 }
 
-function UserManager() {
+function UserManager({ currentUserId }: { currentUserId: string | null }) {
   const { t } = useTranslation();
   const [users, setUsers] = useState<AuthUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +58,10 @@ function UserManager() {
   const fetchUsers = async () => {
     try {
       const res = await fetch('/api/auth/users');
-      if (res.ok) setUsers(await res.json());
+      if (res.ok) {
+        const all = await res.json();
+        setUsers(all.filter((u: AuthUser) => u.id === currentUserId));
+      }
     } catch {}
     setLoading(false);
   };
@@ -139,19 +142,12 @@ function UserManager() {
             </button>
           </div>
         ) : (
-          <div>
-            <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-2.5 dark:border-zinc-800">
-              <p className="text-xs font-medium text-zinc-400">
-                {t('users.userCount', { count: users.length })}
-              </p>
-              <button
-                onClick={() => { resetForm(); setShowForm(true); }}
-                className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400"
-              >
-                <Plus size={14} />
-                {t('users.addUser')}
-              </button>
-            </div>
+            <div>
+              <div className="border-b border-zinc-100 px-4 py-2.5 dark:border-zinc-800">
+                <p className="text-xs font-medium text-zinc-400">
+                  {t('users.userCount', { count: users.length })}
+                </p>
+              </div>
             <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {users.map((u) => {
                 const isEditing = editingId === u.id && showForm;
@@ -200,7 +196,6 @@ function UserManager() {
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
                           <button onClick={() => startEdit(u)} className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"><Pencil size={14} /></button>
-                          <button onClick={() => setDeleteConfirmId(u.id)} className="rounded-lg p-1.5 text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950"><Trash2 size={14} /></button>
                         </div>
                       </div>
                     )}
@@ -257,13 +252,14 @@ function SettingsContent() {
   const logout = useStore((s) => s.logout);
   const userEmail = useStore((s) => s.userEmail);
   const userEmailVerified = useStore((s) => s.userEmailVerified);
+  const currentUserId = useStore((s) => s.auth.currentUserId);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const [firstName, setFirstName] = useState('');
   const [lastName1, setLastName1] = useState('');
   const [lastName2, setLastName2] = useState('');
-  const [handicap, setHandicap] = useState('');
   const [homeCourse, setHomeCourse] = useState('');
+  const [email, setEmail] = useState('');
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -271,35 +267,44 @@ function SettingsContent() {
       setFirstName(player.firstName || '');
       setLastName1(player.lastName1 || '');
       setLastName2(player.lastName2 || '');
-      setHandicap(player.handicap?.toString() || '');
       setHomeCourse(player.homeCourse || '');
+      setEmail(player.email || '');
     }
   }, [player?.id]);
 
   const handleSaveProfile = async () => {
     const updated = {
       id: player?.id || Date.now().toString(),
+      email: player?.email || '',
       firstName: firstName.trim() || 'Golfer',
       lastName1: lastName1.trim(),
       lastName2: lastName2.trim(),
-      handicap: parseFloat(handicap) || 0,
+      handicap: player?.handicap || 0,
       homeCourse,
       licenseNumber: player?.licenseNumber || '',
     };
     setPlayer(updated);
 
-    if (player?.id) {
+    if (currentUserId) {
       try {
-        await fetch(`/api/auth/users/${player.id}`, {
+        await fetch(`/api/auth/users/${currentUserId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             firstName: updated.firstName,
             lastName1: updated.lastName1,
             lastName2: updated.lastName2,
-            handicap: updated.handicap,
-            homeCourse: updated.homeCourse,
           }),
+        })
+      } catch {}
+    }
+
+    if (player?.id) {
+      try {
+        await fetch('/api/players', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updated),
         })
       } catch {}
     }
@@ -373,19 +378,6 @@ function SettingsContent() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-zinc-500">
-                {t('profile.handicap')}
-              </label>
-              <input
-                type="number"
-                value={handicap}
-                onChange={(e) => setHandicap(e.target.value)}
-                placeholder="0.0"
-                step="0.1"
-                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-500">
                 {t('profile.homeCourse')}
               </label>
               <select
@@ -400,6 +392,18 @@ function SettingsContent() {
                   </option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-zinc-500">
+                {t('profile.email')}
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@example.com"
+                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
+              />
             </div>
             <button
               onClick={handleSaveProfile}
@@ -465,7 +469,7 @@ function SettingsContent() {
         </section>
 
         {/* Users Section */}
-        <UserManager />
+        <UserManager currentUserId={currentUserId} />
 
         {/* Courses Section */}
         <section>

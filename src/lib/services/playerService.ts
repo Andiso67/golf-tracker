@@ -4,6 +4,7 @@ import type { Player } from '@/types'
 function mapPlayer(p: any): Player {
   return {
     id: p.id,
+    email: p.email || '',
     firstName: p.firstName,
     lastName1: p.lastName1 || '',
     lastName2: p.lastName2 || '',
@@ -21,6 +22,7 @@ export async function getPlayer(id: string): Promise<Player | null> {
 
 export async function getOrCreatePlayer(data: {
   id?: string
+  email: string
   firstName: string
   lastName1?: string
   lastName2?: string
@@ -34,6 +36,7 @@ export async function getOrCreatePlayer(data: {
       const updated = await prisma.player.update({
         where: { id: data.id },
         data: {
+          email: data.email,
           firstName: data.firstName,
           lastName1: data.lastName1 || '',
           lastName2: data.lastName2 || '',
@@ -47,6 +50,7 @@ export async function getOrCreatePlayer(data: {
   }
   const created = await prisma.player.create({
     data: {
+      email: data.email,
       firstName: data.firstName,
       lastName1: data.lastName1 || '',
       lastName2: data.lastName2 || '',
@@ -60,7 +64,7 @@ export async function getOrCreatePlayer(data: {
 
 export async function updatePlayer(
   id: string,
-  data: Partial<Pick<Player, 'firstName' | 'lastName1' | 'lastName2' | 'handicap' | 'homeCourse' | 'licenseNumber'>>
+  data: Partial<Pick<Player, 'email' | 'firstName' | 'lastName1' | 'lastName2' | 'handicap' | 'homeCourse' | 'licenseNumber'>>
 ): Promise<Player | null> {
   const updated = await prisma.player.update({
     where: { id },

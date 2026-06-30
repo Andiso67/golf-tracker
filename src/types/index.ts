@@ -10,6 +10,7 @@ export interface User {
 export interface Player {
   id: string;
   userId?: string;
+  email: string;
   firstName: string;
   lastName1: string;
   lastName2: string;

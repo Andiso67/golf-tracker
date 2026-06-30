@@ -15,11 +15,13 @@ export default function ProfilePage() {
   const setLanguage = useStore((s) => s.setLanguage);
   const userEmail = useStore((s) => s.userEmail);
   const userEmailVerified = useStore((s) => s.userEmailVerified);
+  const currentUserId = useStore((s) => s.auth.currentUserId);
   const { t } = useTranslation();
 
   const [firstName, setFirstName] = useState('');
   const [lastName1, setLastName1] = useState('');
   const [lastName2, setLastName2] = useState('');
+  const [email, setEmail] = useState('');
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -27,13 +29,15 @@ export default function ProfilePage() {
       setFirstName(player.firstName || '');
       setLastName1(player.lastName1 || '');
       setLastName2(player.lastName2 || '');
+      setEmail(player.email || '');
     }
   }, [player?.id]);
 
   const handleSave = async () => {
     const updated = {
-      id: player?.id || Date.now().toString(),
-      firstName: firstName.trim() || 'Golfer',
+      id: player?.id || '',
+      email: email.trim(),
+      firstName: firstName.trim(),
       lastName1: lastName1.trim(),
       lastName2: lastName2.trim(),
       handicap: player?.handicap || 0,
@@ -42,9 +46,9 @@ export default function ProfilePage() {
     };
     setPlayer(updated);
 
-    if (player?.id) {
+    if (currentUserId) {
       try {
-        await fetch(`/api/auth/users/${player.id}`, {
+        await fetch(`/api/auth/users/${currentUserId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -52,6 +56,16 @@ export default function ProfilePage() {
             lastName1: updated.lastName1,
             lastName2: updated.lastName2,
           }),
+        })
+      } catch {}
+    }
+
+    if (player?.id) {
+      try {
+        await fetch('/api/players', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updated),
         })
       } catch {}
     }
@@ -120,6 +134,19 @@ export default function ProfilePage() {
               value={lastName2}
               onChange={(e) => setLastName2(e.target.value)}
               placeholder={t('profile.lastName2Placeholder')}
+              className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-zinc-500">
+              {t('profile.email')}
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="email@example.com"
               className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
             />
           </div>

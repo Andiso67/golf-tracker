@@ -35,13 +35,11 @@ model User {
   resetPasswordExpires DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  player      Player?
 }
 
 model Player {
   id          String   @id @default(cuid())
-  userId      String?  @unique
+  email       String   @default("") @unique
   firstName   String
   lastName1   String   @default("")
   lastName2   String   @default("")
@@ -51,7 +49,6 @@ model Player {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   rounds      Round[]
   handicapHistory HandicapEntry[]
 }

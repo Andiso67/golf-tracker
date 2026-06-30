@@ -118,22 +118,3 @@ export async function destroySession(userId: string): Promise<void> {
     data: { verificationToken: null },
   })
 }
-
-export async function getPlayerForUser(userId: string): Promise<string> {
-  let player = await prisma.player.findUnique({ where: { userId } })
-  if (!player) {
-    const user = await prisma.user.findUnique({ where: { id: userId } })
-    if (!user) throw new Error('User not found')
-    player = await prisma.player.create({
-      data: {
-        userId: user.id,
-        firstName: user.firstName,
-        lastName1: user.lastName1,
-        lastName2: user.lastName2,
-        handicap: 0,
-        homeCourse: '',
-      },
-    })
-  }
-  return player.id
-}

@@ -127,6 +127,36 @@ sudo docker build --no-cache -t golf-tracker-app .
 sudo docker compose up -d
 ```
 
+### 6. Conectarse a la base de datos desde local
+
+El contenedor de PostgreSQL **no está expuesto a internet** (solo escucha en `127.0.0.1` dentro de la EC2).
+
+#### Opción A — psql directo por SSH
+
+```bash
+ssh -i ~/Downloads/tu-clave.pem ec2-user@<IP_PUBLICA>
+docker exec -it golf-tracker-db psql -U golf golf_tracker
+```
+
+#### Opción B — Túnel SSH + pgAdmin/DBeaver
+
+```bash
+# En una terminal, abre el túnel (déjalo corriendo):
+ssh -i ~/Downloads/tu-clave.pem -L 5433:localhost:5432 ec2-user@<IP_PUBLICA>
+```
+
+Luego conecta tu cliente gráfico a:
+
+| Campo       | Valor        |
+|-------------|-------------|
+| Host        | `localhost` |
+| Port        | `5433`      |
+| Username    | `golf`      |
+| Password    | `golf_dev`  |
+| Database    | `golf_tracker` |
+
+**Recomendación**: [pgAdmin](https://www.pgadmin.org/download/) (gratuito, multiplataforma). Alternativas: DBeaver, TablePlus.
+
 ## Estructura del proyecto
 
 ```

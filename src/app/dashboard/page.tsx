@@ -54,14 +54,18 @@ const Area = dynamic(() => import('recharts').then((mod) => mod.Area), {
 
 export default function DashboardPage() {
   const rounds = useStore((s) => s.rounds);
+  const player = useStore((s) => s.player);
   const handicapHistory = useStore((s) => s.handicapHistory);
   const language = useStore((s) => s.language);
   const deleteRound = useStore((s) => s.deleteRound);
   const { t } = useTranslation();
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
+  const currentPlayerId = player?.id;
+
   const completedRounds = rounds
-    .filter((r) => r.completed)
+    .filter((r) => r.completed && currentPlayerId)
+    .filter((r) => (r.players || []).some((p) => p.playerId === currentPlayerId))
     .sort(
       (a, b) =>
         new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -72,21 +76,24 @@ export default function DashboardPage() {
   const chartData = useMemo(() => {
     return completedRounds.map((round) => {
       const stats = calculateRoundStats(round.players, round.gameMode);
-      const ps = stats.playerStats[0] || { scoreToPar: 0, totalScore: 0, girPercentage: 0, avgPutts: 0, fairwaysPercentage: 0 };
+      const myStats = stats.playerStats.find(
+        (ps) => ps.playerId === currentPlayerId
+      ) || stats.playerStats[0] || { scoreToPar: 0, totalScore: 0, girPercentage: 0, avgPutts: 0, fairwaysPercentage: 0, puttsByDistance: { '<1': 0, '1-2': 0, '2-4': 0, '4-8': 0, '+8': 0 } };
       return {
         date: new Date(round.date).toLocaleDateString(locale, {
           month: 'short',
           day: 'numeric',
         }),
-        scoreToPar: ps.scoreToPar,
-        totalScore: ps.totalScore,
-        girPercentage: ps.girPercentage,
-        putts: ps.avgPutts,
-        fairwaysPercentage: ps.fairwaysPercentage,
+        scoreToPar: myStats.scoreToPar,
+        totalScore: myStats.totalScore,
+        girPercentage: myStats.girPercentage,
+        putts: myStats.avgPutts,
+        fairwaysPercentage: myStats.fairwaysPercentage,
+        puttsByDistance: myStats.puttsByDistance,
         label: round.courseName.slice(0, 10),
       };
     });
-  }, [completedRounds, locale]);
+  }, [completedRounds, locale, currentPlayerId]);
 
   const handicapData = useMemo(() => {
     return handicapHistory.map((entry) => ({
@@ -102,7 +109,7 @@ export default function DashboardPage() {
     if (completedRounds.length === 0) return null;
     const allStats = completedRounds.map((r) => {
       const s = calculateRoundStats(r.players, r.gameMode);
-      return s.playerStats[0] || { totalScore: 0, girPercentage: 0, avgPutts: 0, fairwaysPercentage: 0, scoreToPar: 0 };
+      return s.playerStats.find((ps) => ps.playerId === currentPlayerId) || s.playerStats[0] || { totalScore: 0, girPercentage: 0, avgPutts: 0, fairwaysPercentage: 0, scoreToPar: 0 };
     });
     return {
       avgScore: Math.round(
@@ -121,7 +128,7 @@ export default function DashboardPage() {
           allStats.length
       ),
     };
-  }, [completedRounds]);
+  }, [completedRounds, currentPlayerId]);
 
   return (
     <>
@@ -217,7 +224,7 @@ export default function DashboardPage() {
                         vertical={false}
                       />
                       <XAxis
-                        dataKey="label"
+                        dataKey="date"
                         tick={{ fontSize: 10, fill: '#a1a1aa' }}
                         axisLine={false}
                         tickLine={false}
@@ -259,7 +266,7 @@ export default function DashboardPage() {
                           vertical={false}
                         />
                         <XAxis
-                          dataKey="label"
+                          dataKey="date"
                           tick={false}
                           axisLine={false}
                           tickLine={false}
@@ -270,6 +277,7 @@ export default function DashboardPage() {
                           tickLine={false}
                           width={25}
                           domain={[0, 100]}
+                          unit="%"
                         />
                         <Tooltip
                           contentStyle={{
@@ -301,7 +309,7 @@ export default function DashboardPage() {
                           vertical={false}
                         />
                         <XAxis
-                          dataKey="label"
+                          dataKey="date"
                           tick={false}
                           axisLine={false}
                           tickLine={false}
@@ -408,7 +416,7 @@ export default function DashboardPage() {
                   const totals: Record<typeof keys[number], number> = { '<1': 0, '1-2': 0, '2-4': 0, '4-8': 0, '+8': 0 };
                   for (const r of completedRounds) {
                     const s = calculateRoundStats(r.players, r.gameMode);
-                    const ps = s.playerStats[0] || { puttsByDistance: { '<1': 0, '1-2': 0, '2-4': 0, '4-8': 0, '+8': 0 } };
+                    const ps = s.playerStats.find((p) => p.playerId === currentPlayerId) || s.playerStats[0] || { puttsByDistance: { '<1': 0, '1-2': 0, '2-4': 0, '4-8': 0, '+8': 0 } };
                     for (const k of keys) {
                       totals[k] += ps.puttsByDistance[k];
                     }
@@ -448,7 +456,7 @@ export default function DashboardPage() {
                   .reverse()
                   .map((round) => {
                     const stats = calculateRoundStats(round.players, round.gameMode);
-                    const ps = stats.playerStats[0] || { scoreToPar: 0, totalScore: 0, girPercentage: 0, avgPutts: 0, fairwaysPercentage: 0 };
+                    const ps = stats.playerStats.find((p) => p.playerId === currentPlayerId) || stats.playerStats[0] || { scoreToPar: 0, totalScore: 0, girPercentage: 0, avgPutts: 0, fairwaysPercentage: 0 };
                     const isDeleting = deleteConfirmId === round.id;
                     return (
                       <div

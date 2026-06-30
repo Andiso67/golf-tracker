@@ -17,7 +17,10 @@ export function useRfegHandicapSync(player: Player | null): SyncStatus {
       return
     }
 
-    if (syncedRef.current === player.id) return
+    if (syncedRef.current === player.id) {
+      setStatus('idle')
+      return
+    }
     syncedRef.current = player.id
 
     let cancelled = false
@@ -72,7 +75,7 @@ export function useRfegHandicapSync(player: Player | null): SyncStatus {
       cancelled = true
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [player?.id, player?.licenseNumber, player?.firstName, player?.lastName1, player?.lastName2, player?.handicap, updatePlayer])
+  }, [player?.id, player?.licenseNumber, player?.firstName, player?.lastName1, player?.lastName2])
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getAllRounds, createRound } from '@/lib/services/roundService'
 
 export async function GET() {
-  const rounds = await getAllRounds('local')
+  const rounds = await getAllRounds()
   return NextResponse.json(rounds)
 }
 

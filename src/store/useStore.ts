@@ -59,7 +59,7 @@ interface GolfStore {
   setPlayer: (player: Player) => void;
   updatePlayer: (data: Partial<Player>) => void;
   setLanguage: (lang: Language) => void;
-  addPlayer: (firstName: string, lastName1?: string, lastName2?: string, licenseNumber?: string) => string;
+  addPlayer: (firstName: string, lastName1?: string, lastName2?: string, licenseNumber?: string, email?: string) => string;
   setActivePlayer: (id: string) => void;
   deletePlayer: (id: string) => void;
 
@@ -156,10 +156,11 @@ export const useStore = create<GolfStore>()(
 
       setLanguage: (language) => set({ language }),
 
-      addPlayer: (firstName: string, lastName1?: string, lastName2?: string, licenseNumber?: string) => {
+      addPlayer: (firstName: string, lastName1?: string, lastName2?: string, licenseNumber?: string, email?: string) => {
         const id = generateId();
         const newPlayer: Player = {
           id,
+          email: email || '',
           firstName,
           lastName1: lastName1 || '',
           lastName2: lastName2 || '',
@@ -214,19 +215,45 @@ export const useStore = create<GolfStore>()(
               sessionToken: data.sessionToken,
               currentUserId: data.userId,
             },
-            player: {
-              id: data.playerId,
-              userId: data.userId,
-              firstName: data.firstName,
-              lastName1: data.lastName1 || '',
-              lastName2: data.lastName2 || '',
-              handicap: 0,
-              homeCourse: '',
-              licenseNumber: '',
-            },
             userEmail: data.email,
             userEmailVerified: data.emailVerified || null,
           })
+          // Auto-create or find player by email
+          try {
+            const playersRes = await fetch('/api/players')
+            if (playersRes.ok) {
+              const allPlayers = await playersRes.json()
+              const existingPlayer = allPlayers.find(
+                (p: any) => p.email?.toLowerCase() === data.email?.toLowerCase()
+              )
+              if (existingPlayer) {
+                set((state) => ({
+                  players: allPlayers,
+                  player: existingPlayer,
+                  activePlayerId: existingPlayer.id,
+                }))
+              } else {
+                const playerRes = await fetch('/api/players', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    firstName: data.firstName,
+                    lastName1: data.lastName1 || '',
+                    lastName2: data.lastName2 || '',
+                    email: data.email,
+                  }),
+                })
+                if (playerRes.ok) {
+                  const newPlayer = await playerRes.json()
+                  set((state) => ({
+                    players: [...state.players, newPlayer],
+                    player: newPlayer,
+                    activePlayerId: newPlayer.id,
+                  }))
+                }
+              }
+            }
+          } catch {}
           return { success: true }
         } catch {
           return { success: false, error: 'Network error' }
@@ -251,19 +278,30 @@ export const useStore = create<GolfStore>()(
               sessionToken: result.sessionToken,
               currentUserId: result.userId,
             },
-            player: {
-              id: result.playerId,
-              userId: result.userId,
-              firstName: result.firstName,
-              lastName1: result.lastName1 || '',
-              lastName2: result.lastName2 || '',
-              handicap: 0,
-              homeCourse: '',
-              licenseNumber: '',
-            },
             userEmail: result.email,
             userEmailVerified: result.emailVerified || null,
           })
+          // Auto-create player from user data
+          try {
+            const playerRes = await fetch('/api/players', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                firstName: result.firstName,
+                lastName1: result.lastName1 || '',
+                lastName2: result.lastName2 || '',
+                email: result.email,
+              }),
+            })
+            if (playerRes.ok) {
+              const newPlayer = await playerRes.json()
+              set((state) => ({
+                players: [...state.players, newPlayer],
+                player: newPlayer,
+                activePlayerId: newPlayer.id,
+              }))
+            }
+          } catch {}
           return { success: true }
         } catch {
           return { success: false, error: 'Network error' }
@@ -306,19 +344,23 @@ export const useStore = create<GolfStore>()(
           const data = await res.json()
           set({
             auth: { isLoggedIn: true, sessionToken: token, currentUserId: data.userId },
-            player: {
-              id: data.playerId,
-              userId: data.userId,
-              firstName: data.firstName,
-              lastName1: data.lastName1 || '',
-              lastName2: data.lastName2 || '',
-              handicap: 0,
-              homeCourse: '',
-              licenseNumber: '',
-            },
             userEmail: data.email,
             userEmailVerified: data.emailVerified || null,
           })
+          // Try to select first player if none selected
+          const state = get()
+          if (!state.player) {
+            try {
+              const playersRes = await fetch('/api/players')
+              if (playersRes.ok) {
+                const allPlayers = await playersRes.json()
+                if (allPlayers.length > 0) {
+                  const matched = allPlayers.find((p: any) => p.email === data.email) || allPlayers[0]
+                  set({ player: matched, players: allPlayers, activePlayerId: matched.id })
+                }
+              }
+            } catch {}
+          }
         } catch {
           // offline — keep current state
         }
@@ -327,10 +369,10 @@ export const useStore = create<GolfStore>()(
       syncFromApi: async () => {
         set({ _syncing: true });
         try {
-          const [coursesRes, roundsRes, playerRes] = await Promise.allSettled([
+          const [coursesRes, roundsRes, playersRes] = await Promise.allSettled([
             fetch('/api/courses'),
             fetch('/api/rounds'),
-            fetch('/api/player'),
+            fetch('/api/players'),
           ])
 
           if (coursesRes.status === 'fulfilled' && coursesRes.value.ok) {
@@ -363,11 +405,26 @@ export const useStore = create<GolfStore>()(
             })
           }
 
-          if (playerRes.status === 'fulfilled' && playerRes.value.ok) {
-            const apiPlayer: Player = await playerRes.value.json()
-            set((state) => ({
-              player: state.player ?? apiPlayer,
-            }))
+          if (playersRes.status === 'fulfilled' && playersRes.value.ok) {
+            const apiPlayers: Player[] = await playersRes.value.json()
+            set((state) => {
+              const localIds = new Set(state.players.map((p) => p.id))
+              const merged = [
+                ...state.players,
+                ...apiPlayers.filter((ap) => !localIds.has(ap.id)),
+              ]
+              const currentPlayerStillExists = state.player && merged.find((p) => p.id === state.player!.id)
+              const nextPlayer = currentPlayerStillExists
+                ? state.player
+                : state.userEmail
+                  ? (merged.find((p) => p.email === state.userEmail) ?? merged[0] ?? null)
+                  : (merged[0] ?? null)
+              return {
+                players: merged,
+                player: nextPlayer,
+                activePlayerId: nextPlayer?.id ?? state.activePlayerId,
+              }
+            })
           }
         } catch {
           // silent fail — localStorage is the fallback
@@ -377,7 +434,7 @@ export const useStore = create<GolfStore>()(
 
       syncPlayerToApi: async (player) => {
         try {
-          await fetch('/api/player', {
+          await fetch('/api/players', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(player),

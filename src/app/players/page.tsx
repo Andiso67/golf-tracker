@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -14,6 +14,7 @@ import {
   Users,
   MapPin,
   Flag,
+  Search,
 } from 'lucide-react';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
@@ -44,9 +45,40 @@ export default function PlayersPage() {
   const courses = useStore((s) => s.courses);
   const setPlayer = useStore((s) => s.setPlayer);
   const deletePlayer = useStore((s) => s.deletePlayer);
+  const userEmail = useStore((s) => s.userEmail);
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [allPlayers, setAllPlayers] = useState<Player[]>([]);
+  const [search, setSearch] = useState('');
+
+  const currentPlayerId = player?.id || activePlayerId;
+
+  useEffect(() => {
+    if (!currentPlayerId) return;
+    Promise.all([
+      fetch('/api/players').then((r) => (r.ok ? r.json() : [])),
+      fetch('/api/rounds').then((r) => (r.ok ? r.json() : [])),
+    ])
+      .then(([apiPlayers, rounds]) => {
+        const usedIds = new Set<string>();
+        usedIds.add(currentPlayerId);
+        for (const r of rounds) {
+          const hasCurrent = (r.players || []).some(
+            (p: any) => p.playerId === currentPlayerId
+          );
+          if (hasCurrent) {
+            for (const p of r.players || []) {
+              usedIds.add(p.playerId);
+            }
+          }
+        }
+        setAllPlayers(
+          (apiPlayers as Player[]).filter((p) => usedIds.has(p.id))
+        );
+      })
+      .catch(() => {});
+  }, [currentPlayerId]);
 
   const [formFirstName, setFormFirstName] = useState('');
   const [formLastName1, setFormLastName1] = useState('');
@@ -133,9 +165,41 @@ export default function PlayersPage() {
           licenseNumber: formLicenseNumber.trim(),
         };
         setPlayer(updated);
+        fetch('/api/players', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updated),
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((result) => {
+            if (result) {
+              setAllPlayers((prev) => prev.map((pl) => (pl.id === result.id ? result : pl)));
+            }
+          })
+          .catch(() => {});
       }
     } else {
-      addPlayer(formFirstName.trim(), formLastName1.trim(), formLastName2.trim(), formLicenseNumber.trim());
+      const id = addPlayer(formFirstName.trim(), formLastName1.trim(), formLastName2.trim(), formLicenseNumber.trim(), '');
+      const created = {
+        id,
+        email: '',
+        firstName: formFirstName.trim(),
+        lastName1: formLastName1.trim(),
+        lastName2: formLastName2.trim(),
+        handicap: parseFloat(formHandicap) || 0,
+        homeCourse: formHomeCourse,
+        licenseNumber: formLicenseNumber.trim(),
+      };
+      fetch('/api/players', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(created),
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((result) => {
+          if (result) setAllPlayers((prev) => [...prev, result]);
+        })
+        .catch(() => {});
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
@@ -144,10 +208,21 @@ export default function PlayersPage() {
 
   const handleDelete = (id: string) => {
     deletePlayer(id);
+    setAllPlayers((prev) => prev.filter((p) => p.id !== id));
     setDeleteConfirmId(null);
   };
 
-  const sortedPlayers = [...players].sort((a, b) => {
+  const query = search.toLowerCase().trim();
+  const filteredPlayers = allPlayers.filter(
+    (p) =>
+      !query ||
+      p.firstName.toLowerCase().includes(query) ||
+      p.lastName1.toLowerCase().includes(query) ||
+      p.lastName2.toLowerCase().includes(query) ||
+      (p.email || '').toLowerCase().includes(query) ||
+      (p.homeCourse || '').toLowerCase().includes(query)
+  );
+  const sortedPlayers = [...filteredPlayers].sort((a, b) => {
     if (a.id === activePlayerId) return -1;
     if (b.id === activePlayerId) return 1;
     return playerFullName(a).localeCompare(playerFullName(b));
@@ -197,7 +272,7 @@ export default function PlayersPage() {
 
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-medium text-zinc-500">
-            {t('players.playerCount', { count: players.length })}
+            {t('players.playerCount', { count: allPlayers.length })}
           </p>
           <button
             onClick={() => {
@@ -209,6 +284,17 @@ export default function PlayersPage() {
             <Plus size={16} />
             {t('players.addPlayer')}
           </button>
+        </div>
+
+        <div className="relative mb-3">
+          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('players.searchPlaceholder')}
+            className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-500"
+          />
         </div>
 
         <AnimatePresence>
@@ -365,6 +451,7 @@ export default function PlayersPage() {
                 const isActive = p.id === activePlayerId;
                 const isEditing = editingId === p.id;
                 const isDeleting = deleteConfirmId === p.id;
+                const isOwnPlayer = userEmail ? p.email?.toLowerCase() === userEmail.toLowerCase() : false;
 
                 return (
                   <motion.div
@@ -422,13 +509,15 @@ export default function PlayersPage() {
                           </p>
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
-                          <button
-                            onClick={() => startEdit(p)}
-                            className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                          >
-                            <Pencil size={14} />
-                          </button>
-                          {players.length > 1 && !isActive && (
+                          {isOwnPlayer && (
+                            <button
+                              onClick={() => startEdit(p)}
+                              className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                          )}
+                          {isOwnPlayer && players.length > 1 && !isActive && (
                             <button
                               onClick={() => setDeleteConfirmId(p.id)}
                               className="rounded-lg p-1.5 text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950"

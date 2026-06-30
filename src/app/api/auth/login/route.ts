@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifyPassword, createSession, getPlayerForUser } from '@/lib/auth'
+import { verifyPassword, createSession } from '@/lib/auth'
 
 export async function POST(req: Request) {
   const { email, password } = await req.json()
@@ -20,11 +20,9 @@ export async function POST(req: Request) {
   }
 
   const sessionToken = await createSession(user.id)
-  const playerId = await getPlayerForUser(user.id)
 
   return NextResponse.json({
     userId: user.id,
-    playerId,
     firstName: user.firstName,
     lastName1: user.lastName1,
     lastName2: user.lastName2,

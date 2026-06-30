@@ -56,9 +56,9 @@ function holeFromDb(h: any): HoleData {
   }
 }
 
-export async function getAllRounds(playerId: string): Promise<Round[]> {
+export async function getAllRounds(playerId?: string): Promise<Round[]> {
   const rounds = await prisma.round.findMany({
-    where: { playerId },
+    where: playerId ? { playerId } : undefined,
     include: { holes: { orderBy: { number: 'asc' } } },
     orderBy: { date: 'desc' },
   })

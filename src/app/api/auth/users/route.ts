@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { hashPassword, getPlayerForUser } from '@/lib/auth'
+import { hashPassword } from '@/lib/auth'
 
 export async function GET() {
   const users = await prisma.user.findMany({
@@ -48,17 +48,6 @@ export async function POST(req: Request) {
       email: true,
       emailVerified: true,
       createdAt: true,
-    },
-  })
-
-  await prisma.player.create({
-    data: {
-      userId: user.id,
-      firstName: user.firstName,
-      lastName1: user.lastName1,
-      lastName2: user.lastName2,
-      handicap: 0,
-      homeCourse: '',
     },
   })
 

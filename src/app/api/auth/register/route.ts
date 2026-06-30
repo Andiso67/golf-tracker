@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { hashPassword, createSession, createVerificationToken, getPlayerForUser } from '@/lib/auth'
+import { hashPassword, createSession, createVerificationToken } from '@/lib/auth'
 
 export async function POST(req: Request) {
   const { firstName, lastName1, lastName2, email, password } = await req.json()
@@ -26,21 +26,8 @@ export async function POST(req: Request) {
     },
   })
 
-  await prisma.player.create({
-    data: {
-      userId: user.id,
-      firstName: user.firstName,
-      lastName1: user.lastName1,
-      lastName2: user.lastName2,
-      handicap: 0,
-      homeCourse: '',
-      licenseNumber: '',
-    },
-  })
-
   const sessionToken = await createSession(user.id)
   const verificationToken = await createVerificationToken(email)
-  const playerId = await getPlayerForUser(user.id)
 
   const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`
 
@@ -48,7 +35,6 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     userId: user.id,
-    playerId,
     firstName: user.firstName,
     lastName1: user.lastName1,
     lastName2: user.lastName2,

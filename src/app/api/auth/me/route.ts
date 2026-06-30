@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { verifySession, getPlayerForUser } from '@/lib/auth'
+import { verifySession } from '@/lib/auth'
 
 export async function GET(req: Request) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '')
@@ -18,11 +18,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
-  const playerId = await getPlayerForUser(userId)
-
   return NextResponse.json({
     userId: user.id,
-    playerId,
     firstName: user.firstName,
     lastName1: user.lastName1,
     lastName2: user.lastName2,

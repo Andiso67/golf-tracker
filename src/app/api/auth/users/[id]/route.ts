@@ -42,17 +42,6 @@ export async function PUT(
     },
   })
 
-  if (body.firstName || body.lastName1 || body.lastName2) {
-    await prisma.player.updateMany({
-      where: { userId: id },
-      data: {
-        ...(body.firstName !== undefined && { firstName: body.firstName }),
-        ...(body.lastName1 !== undefined && { lastName1: body.lastName1 }),
-        ...(body.lastName2 !== undefined && { lastName2: body.lastName2 }),
-      },
-    })
-  }
-
   return NextResponse.json(updated)
 }
 
