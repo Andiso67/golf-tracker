@@ -41,7 +41,7 @@ export default function NewRoundForm() {
   const [parInputs, setParInputs] = useState<number[]>(DEFAULT_PARS_18);
   const [customPars, setCustomPars] = useState(false);
 
-  const filteredGameModes = GAME_MODES.filter((gm) => gm.format === format)
+  const filteredGameModes = GAME_MODES.filter((gm) => gm.formats.includes(format))
 
   const isPlayerCountValid = (() => {
     if (format === 'individual') return selectedPlayerIds.length >= 1 && selectedPlayerIds.length <= 4
@@ -163,7 +163,7 @@ export default function NewRoundForm() {
               key={f}
               onClick={() => {
                 setFormat(f)
-                const firstMode = GAME_MODES.find((gm) => gm.format === f)
+                const firstMode = GAME_MODES.find((gm) => gm.formats.includes(f))
                 if (firstMode) setGameMode(firstMode.mode)
               }}
               className={`rounded-xl p-2.5 text-left transition-all active:scale-95 ${
