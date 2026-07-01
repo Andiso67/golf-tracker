@@ -32,20 +32,21 @@ export const createRoundSchema = z.object({
         number: z.number().int().min(1).max(18),
         par: z.number().int().min(3).max(6),
         score: z.number().int(),
+        handicap: z.number().optional(),
         fairwayHit: z
           .union([z.literal('Yes'), z.literal('No'), z.literal('Left'), z.literal('Right')])
           .nullable()
-          .optional(),
-        gir: z.boolean().nullable().optional(),
-        putts: z.number().int().optional(),
+          .default(null),
+        gir: z.boolean().nullable().default(null),
+        putts: z.number().int().default(0),
         puttDistance: z
           .union([z.literal('<1'), z.literal('1-2'), z.literal('2-4'), z.literal('4-8'), z.literal('+8')])
           .nullable()
-          .optional(),
-        penalties: z.number().int().optional(),
-        sandSave: z.number().int().optional(),
-        approach: z.number().int().optional(),
-        drivingDistance: z.number().nullable().optional(),
+          .default(null),
+        penalties: z.number().int().default(0),
+        sandSave: z.number().int().default(0),
+        approach: z.number().int().default(0),
+        drivingDistance: z.number().nullable().default(null),
       })
     )
     .optional(),
