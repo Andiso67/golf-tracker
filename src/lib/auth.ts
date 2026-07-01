@@ -5,8 +5,24 @@ import { NextResponse } from 'next/server'
 const SALT_ROUNDS = 10
 const TOKEN_EXPIRY_HOURS = 24
 
+export const SESSION_COOKIE = 'session-token'
+
+function parseCookie(cookieHeader: string | null, name: string): string | null {
+  if (!cookieHeader) return null
+  for (const part of cookieHeader.split(';')) {
+    const eqIdx = part.indexOf('=')
+    if (eqIdx === -1) continue
+    const key = part.substring(0, eqIdx).trim()
+    if (key === name) return part.substring(eqIdx + 1).trim()
+  }
+  return null
+}
+
 export async function getAuthenticatedUserId(req: Request): Promise<string> {
-  const token = req.headers.get('authorization')?.replace('Bearer ', '')
+  let token = parseCookie(req.headers.get('cookie'), SESSION_COOKIE)
+  if (!token) {
+    token = req.headers.get('authorization')?.replace('Bearer ', '') || null
+  }
   if (!token) {
     throw new AuthError('Not authenticated')
   }
@@ -15,6 +31,16 @@ export async function getAuthenticatedUserId(req: Request): Promise<string> {
     throw new AuthError('Invalid session')
   }
   return userId
+}
+
+export const SESSION_MAX_AGE = 60 * 60 * 24 * 7
+
+export const SESSION_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+  maxAge: SESSION_MAX_AGE,
+  path: '/',
 }
 
 export class AuthError extends Error {

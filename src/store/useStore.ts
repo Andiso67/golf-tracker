@@ -98,20 +98,6 @@ interface GolfStore {
   getAllRounds: () => Round[];
 }
 
-function getStoredSession(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem('golf-tracker-session')
-}
-
-function storeSession(token: string | null) {
-  if (typeof window === 'undefined') return
-  if (token) {
-    localStorage.setItem('golf-tracker-session', token)
-  } else {
-    localStorage.removeItem('golf-tracker-session')
-  }
-}
-
 export const useStore = create<GolfStore>()(
   persist(
     (set, get) => ({
@@ -208,11 +194,10 @@ export const useStore = create<GolfStore>()(
           if (!res.ok) {
             return { success: false, error: data.error || 'Login failed' }
           }
-          storeSession(data.sessionToken)
           set({
             auth: {
               isLoggedIn: true,
-              sessionToken: data.sessionToken,
+              sessionToken: null,
               currentUserId: data.userId,
             },
             userEmail: data.email,
@@ -271,11 +256,10 @@ export const useStore = create<GolfStore>()(
           if (!res.ok) {
             return { success: false, error: result.error || 'Registration failed' }
           }
-          storeSession(result.sessionToken)
           set({
             auth: {
               isLoggedIn: true,
-              sessionToken: result.sessionToken,
+              sessionToken: null,
               currentUserId: result.userId,
             },
             userEmail: result.email,
@@ -309,15 +293,9 @@ export const useStore = create<GolfStore>()(
       },
 
       logout: async () => {
-        const token = get().auth.sessionToken
         try {
-          await fetch('/api/auth/logout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionToken: token }),
-          })
+          await fetch('/api/auth/logout', { method: 'POST' })
         } catch {}
-        storeSession(null)
         set({
           auth: { isLoggedIn: false, sessionToken: null, currentUserId: null },
           player: null,
@@ -327,25 +305,17 @@ export const useStore = create<GolfStore>()(
       },
 
       checkAuth: async () => {
-        const token = getStoredSession()
-        if (!token) {
-          set({ auth: { isLoggedIn: false, sessionToken: null, currentUserId: null } })
-          return
-        }
         try {
-          const res = await fetch('/api/auth/me', {
-            headers: { authorization: `Bearer ${token}` },
-          })
+          const res = await fetch('/api/auth/session')
           if (!res.ok) {
-            storeSession(null)
             set({ auth: { isLoggedIn: false, sessionToken: null, currentUserId: null } })
             return
           }
           const data = await res.json()
           set({
-            auth: { isLoggedIn: true, sessionToken: token, currentUserId: data.userId },
-            userEmail: data.email,
-            userEmailVerified: data.emailVerified || null,
+            auth: { isLoggedIn: true, sessionToken: null, currentUserId: data.user.id },
+            userEmail: data.user.email,
+            userEmailVerified: data.user.emailVerified || null,
           })
           // Try to select first player if none selected
           const state = get()

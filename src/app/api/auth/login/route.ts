@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
-import { verifyPassword, createSession } from '@/lib/auth'
+import { verifyPassword, createSession, SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from '@/lib/auth'
 import { loginSchema, formatZodErrors } from '@/lib/validations'
 import { checkRateLimit, extractIp, rateLimitResponse } from '@/lib/rateLimit'
 
@@ -30,6 +31,9 @@ export async function POST(req: Request) {
 
   const sessionToken = await createSession(user.id)
 
+  const cookieStore = await cookies()
+  cookieStore.set(SESSION_COOKIE, sessionToken, SESSION_COOKIE_OPTIONS)
+
   return NextResponse.json({
     userId: user.id,
     firstName: user.firstName,
@@ -37,6 +41,5 @@ export async function POST(req: Request) {
     lastName2: user.lastName2,
     email: user.email,
     emailVerified: user.emailVerified?.toISOString() || null,
-    sessionToken,
   })
 }

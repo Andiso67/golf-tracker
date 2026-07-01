@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
-import { hashPassword, createSession, createVerificationToken } from '@/lib/auth'
+import { hashPassword, createSession, createVerificationToken, SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from '@/lib/auth'
 import { registerSchema, formatZodErrors } from '@/lib/validations'
 import { checkRateLimit, extractIp, rateLimitResponse } from '@/lib/rateLimit'
 
@@ -42,6 +43,9 @@ export async function POST(req: Request) {
 
   console.log(`[EMAIL] Verify: ${verificationUrl}`)
 
+  const cookieStore = await cookies()
+  cookieStore.set(SESSION_COOKIE, sessionToken, SESSION_COOKIE_OPTIONS)
+
   return NextResponse.json({
     userId: user.id,
     firstName: user.firstName,
@@ -49,7 +53,6 @@ export async function POST(req: Request) {
     lastName2: user.lastName2,
     email: user.email,
     emailVerified: null,
-    sessionToken,
     verificationUrl,
   }, { status: 201 })
 }

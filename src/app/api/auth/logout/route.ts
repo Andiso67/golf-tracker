@@ -1,16 +1,22 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
-import { destroySession } from '@/lib/auth'
+import { destroySession, SESSION_COOKIE } from '@/lib/auth'
 
-export async function POST(req: Request) {
-  const { sessionToken } = await req.json()
-  if (sessionToken) {
+export async function POST() {
+  const cookieStore = await cookies()
+  const token = cookieStore.get(SESSION_COOKIE)?.value
+
+  if (token) {
     const user = await prisma.user.findFirst({
-      where: { verificationToken: sessionToken },
+      where: { verificationToken: token },
     })
     if (user) {
       await destroySession(user.id)
     }
   }
-  return NextResponse.json({ success: true })
+
+  const response = NextResponse.json({ success: true })
+  response.cookies.set(SESSION_COOKIE, '', { maxAge: 0, path: '/' })
+  return response
 }
