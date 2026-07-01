@@ -21,6 +21,7 @@ function HomeContent() {
   const logout = useStore((s) => s.logout);
   const auth = useStore((s) => s.auth);
   const deleteRound = useStore((s) => s.deleteRound);
+  const _syncing = useStore((s) => s._syncing);
   const { t } = useTranslation();
   const router = useRouter();
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -178,7 +179,12 @@ function HomeContent() {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-zinc-400">
           {t('home.recentRounds')}
         </h2>
-        {recentRounds.length === 0 ? (
+        {_syncing && rounds.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-zinc-200 py-8 text-center dark:border-zinc-800">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+            <p className="text-sm text-zinc-400">{t('home.loading')}</p>
+          </div>
+        ) : recentRounds.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-zinc-200 py-8 text-center dark:border-zinc-800">
             <Flag size={32} className="text-zinc-300 dark:text-zinc-600" />
             <p className="text-sm text-zinc-400">{t('home.noRounds')}</p>

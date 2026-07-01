@@ -1,11 +1,9 @@
-import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifySession, SESSION_COOKIE } from '@/lib/auth'
 
-export async function GET() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get(SESSION_COOKIE)?.value
+export async function GET(request: NextRequest) {
+  const token = request.cookies.get(SESSION_COOKIE)?.value
 
   if (!token) {
     return NextResponse.json({ authenticated: false }, { status: 401 })

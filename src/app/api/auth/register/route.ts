@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
 import { hashPassword, createSession, createVerificationToken, SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from '@/lib/auth'
 import { registerSchema, formatZodErrors } from '@/lib/validations'
@@ -7,7 +6,7 @@ import { checkRateLimit, extractIp, rateLimitResponse } from '@/lib/rateLimit'
 
 export async function POST(req: Request) {
   const ip = extractIp(req)
-  const { allowed, retryAfter } = checkRateLimit(ip, 3, 3600000)
+  const { allowed, retryAfter } = checkRateLimit(ip, 10, 3600000)
   if (!allowed) {
     return rateLimitResponse(retryAfter)
   }
@@ -43,10 +42,7 @@ export async function POST(req: Request) {
 
   console.log(`[EMAIL] Verify: ${verificationUrl}`)
 
-  const cookieStore = await cookies()
-  cookieStore.set(SESSION_COOKIE, sessionToken, SESSION_COOKIE_OPTIONS)
-
-  return NextResponse.json({
+  const response = NextResponse.json({
     userId: user.id,
     firstName: user.firstName,
     lastName1: user.lastName1,
@@ -55,4 +51,6 @@ export async function POST(req: Request) {
     emailVerified: null,
     verificationUrl,
   }, { status: 201 })
+  response.cookies.set(SESSION_COOKIE, sessionToken, SESSION_COOKIE_OPTIONS)
+  return response
 }
