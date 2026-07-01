@@ -119,6 +119,7 @@ export default function PlayersPage() {
       const data = await res.json();
       setVerifyResult({ rfegName: data.rfegName, handicap: data.handicap });
       setVerifyState(data.match ? 'valid' : 'mismatch');
+      if (data.match) setFormHandicap(data.handicap);
     } catch {
       setVerifyState('error');
     }
