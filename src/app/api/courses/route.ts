@@ -3,6 +3,8 @@ import {
   getAllCourses,
   createCourse,
 } from '@/lib/services/courseService'
+import { getAuthenticatedUserId, handleAuthError } from '@/lib/auth'
+import { createCourseSchema, formatZodErrors } from '@/lib/validations'
 
 export async function GET() {
   const courses = await getAllCourses()
@@ -10,14 +12,17 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const body = await req.json()
-  const { name, tees } = body
-  if (!name || !tees) {
-    return NextResponse.json(
-      { error: 'Name and tees are required' },
-      { status: 400 }
-    )
+  try {
+    await getAuthenticatedUserId(req)
+    const body = await req.json()
+    const result = createCourseSchema.safeParse(body)
+    if (!result.success) {
+      return NextResponse.json({ error: formatZodErrors(result.error) }, { status: 400 })
+    }
+    const { name, tees } = result.data
+    const course = await createCourse(name, tees)
+    return NextResponse.json(course, { status: 201 })
+  } catch (error) {
+    return handleAuthError(error)
   }
-  const course = await createCourse(name, tees)
-  return NextResponse.json(course, { status: 201 })
 }

@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyPassword, createSession } from '@/lib/auth'
+import { loginSchema, formatZodErrors } from '@/lib/validations'
 
 export async function POST(req: Request) {
-  const { email, password } = await req.json()
-
-  if (!email || !password) {
-    return NextResponse.json({ error: 'Email and password required' }, { status: 400 })
+  const body = await req.json()
+  const result = loginSchema.safeParse(body)
+  if (!result.success) {
+    return NextResponse.json({ error: formatZodErrors(result.error) }, { status: 400 })
   }
+  const { email, password } = result.data
 
   const user = await prisma.user.findUnique({ where: { email } })
   if (!user) {

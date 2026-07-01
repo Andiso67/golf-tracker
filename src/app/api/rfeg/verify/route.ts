@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId, handleAuthError } from '@/lib/auth'
+import { verifyLicenseSchema, formatZodErrors } from '@/lib/validations'
 
 function decodeEntities(text: string): string {
   return text.replace(/&#(\d+);/g, (_, c) => String.fromCharCode(Number(c)))
@@ -39,11 +41,13 @@ function parseRfegResponse(html: string, licenseNumber: string): { rfegName: str
 
 export async function POST(req: Request) {
   try {
-    const { licenseNumber, firstName, lastName1, lastName2 } = await req.json()
-
-    if (!licenseNumber || !firstName) {
-      return NextResponse.json({ error: 'licenseNumber and firstName are required' }, { status: 400 })
+    await getAuthenticatedUserId(req)
+    const body = await req.json()
+    const result = verifyLicenseSchema.safeParse(body)
+    if (!result.success) {
+      return NextResponse.json({ error: formatZodErrors(result.error) }, { status: 400 })
     }
+    const { licenseNumber, firstName, lastName1, lastName2 } = result.data
 
     const res = await fetch(
       `https://rfegolf.es/PaginasServicios/ServicioHandicap.aspx?HLic=${encodeURIComponent(licenseNumber)}`,

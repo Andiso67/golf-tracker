@@ -82,9 +82,9 @@ cd golf-tracker
 
 # Variables de producción
 cat > .env.production << 'EOF'
-DATABASE_URL=postgresql://golf:golf_dev@db:5432/golf_tracker?schema=public
-POSTGRES_USER=golf
-POSTGRES_PASSWORD=golf_dev
+DATABASE_URL=postgresql://<TU_USUARIO>:<TU_PASSWORD>@db:5432/golf_tracker?schema=public
+POSTGRES_USER=<TU_USUARIO>
+POSTGRES_PASSWORD=<TU_PASSWORD>
 POSTGRES_DB=golf_tracker
 EOF
 
@@ -151,11 +151,13 @@ Luego conecta tu cliente gráfico a:
 |-------------|-------------|
 | Host        | `localhost` |
 | Port        | `5433`      |
-| Username    | `golf`      |
-| Password    | `golf_dev`  |
+| Username    | `<TU_USUARIO>` |
+| Password    | `<TU_PASSWORD>` |
 | Database    | `golf_tracker` |
 
 **Recomendación**: [pgAdmin](https://www.pgadmin.org/download/) (gratuito, multiplataforma). Alternativas: DBeaver, TablePlus.
+
+> ⚠️ **SEGURIDAD:** Nunca uses credenciales reales en la documentación. Genera contraseñas seguras con: `openssl rand -base64 32`
 
 ## Estructura del proyecto
 

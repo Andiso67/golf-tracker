@@ -1,8 +1,35 @@
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
+import { NextResponse } from 'next/server'
 
 const SALT_ROUNDS = 10
 const TOKEN_EXPIRY_HOURS = 24
+
+export async function getAuthenticatedUserId(req: Request): Promise<string> {
+  const token = req.headers.get('authorization')?.replace('Bearer ', '')
+  if (!token) {
+    throw new AuthError('Not authenticated')
+  }
+  const userId = await verifySession(token)
+  if (!userId) {
+    throw new AuthError('Invalid session')
+  }
+  return userId
+}
+
+export class AuthError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'AuthError'
+  }
+}
+
+export function handleAuthError(error: unknown): NextResponse {
+  if (error instanceof AuthError) {
+    return NextResponse.json({ error: error.message }, { status: 401 })
+  }
+  return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+}
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, SALT_ROUNDS)
