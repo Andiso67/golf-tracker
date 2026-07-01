@@ -45,20 +45,22 @@ export type GameMode =
   | 'copacanada'
   | 'skins';
 
-export const GAME_MODES: { mode: GameMode; labelKey: string; descKey: string; players: number }[] = [
-  { mode: 'stroke-play', labelKey: 'newRound.strokePlay', descKey: 'newRound.strokePlayDesc', players: 1 },
-  { mode: 'medal-play', labelKey: 'newRound.medalPlay', descKey: 'newRound.medalPlayDesc', players: 1 },
-  { mode: 'stableford', labelKey: 'newRound.stableford', descKey: 'newRound.stablefordDesc', players: 1 },
-  { mode: 'max-score', labelKey: 'newRound.maxScore', descKey: 'newRound.maxScoreDesc', players: 1 },
-  { mode: 'match-play', labelKey: 'newRound.matchPlay', descKey: 'newRound.matchPlayDesc', players: 2 },
-  { mode: 'foursome', labelKey: 'newRound.foursome', descKey: 'newRound.foursomeDesc', players: 2 },
-  { mode: 'fourball', labelKey: 'newRound.fourball', descKey: 'newRound.fourballDesc', players: 2 },
-  { mode: 'greensome', labelKey: 'newRound.greensome', descKey: 'newRound.greensomeDesc', players: 2 },
-  { mode: 'greensome-chapman', labelKey: 'newRound.chapman', descKey: 'newRound.chapmanDesc', players: 2 },
-  { mode: 'scramble', labelKey: 'newRound.scramble', descKey: 'newRound.scrambleDesc', players: 2 },
-  { mode: 'shamble', labelKey: 'newRound.shamble', descKey: 'newRound.shambleDesc', players: 2 },
-  { mode: 'copacanada', labelKey: 'newRound.copaCanada', descKey: 'newRound.copaCanadaDesc', players: 2 },
-  { mode: 'skins', labelKey: 'newRound.skins', descKey: 'newRound.skinsDesc', players: 2 },
+export type Format = 'individual' | 'parejas' | 'equipos'
+
+export const GAME_MODES: { mode: GameMode; labelKey: string; descKey: string; players: number; format: Format }[] = [
+  { mode: 'stroke-play', labelKey: 'newRound.strokePlay', descKey: 'newRound.strokePlayDesc', players: 1, format: 'individual' },
+  { mode: 'medal-play', labelKey: 'newRound.medalPlay', descKey: 'newRound.medalPlayDesc', players: 1, format: 'individual' },
+  { mode: 'stableford', labelKey: 'newRound.stableford', descKey: 'newRound.stablefordDesc', players: 1, format: 'individual' },
+  { mode: 'max-score', labelKey: 'newRound.maxScore', descKey: 'newRound.maxScoreDesc', players: 1, format: 'individual' },
+  { mode: 'match-play', labelKey: 'newRound.matchPlay', descKey: 'newRound.matchPlayDesc', players: 2, format: 'parejas' },
+  { mode: 'foursome', labelKey: 'newRound.foursome', descKey: 'newRound.foursomeDesc', players: 2, format: 'parejas' },
+  { mode: 'fourball', labelKey: 'newRound.fourball', descKey: 'newRound.fourballDesc', players: 2, format: 'parejas' },
+  { mode: 'greensome', labelKey: 'newRound.greensome', descKey: 'newRound.greensomeDesc', players: 2, format: 'parejas' },
+  { mode: 'greensome-chapman', labelKey: 'newRound.chapman', descKey: 'newRound.chapmanDesc', players: 2, format: 'parejas' },
+  { mode: 'scramble', labelKey: 'newRound.scramble', descKey: 'newRound.scrambleDesc', players: 2, format: 'parejas' },
+  { mode: 'shamble', labelKey: 'newRound.shamble', descKey: 'newRound.shambleDesc', players: 2, format: 'parejas' },
+  { mode: 'copacanada', labelKey: 'newRound.copaCanada', descKey: 'newRound.copaCanadaDesc', players: 2, format: 'parejas' },
+  { mode: 'skins', labelKey: 'newRound.skins', descKey: 'newRound.skinsDesc', players: 2, format: 'parejas' },
 ];
 
 export function isTeamMode(mode: GameMode): boolean {

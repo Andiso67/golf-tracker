@@ -10,9 +10,9 @@ import {
   DEFAULT_PARS_9,
   GAME_MODES,
   isTeamMode,
-  isTwoPlayerMode,
   playerFullName,
   type GameMode,
+  type Format,
 } from '@/types';
 import type { SavedCourse, CourseTee, Player } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -31,6 +31,7 @@ export default function NewRoundForm() {
   const [showCoursePicker, setShowCoursePicker] = useState(false);
   const [courseFilter, setCourseFilter] = useState('');
   const [customCourseName, setCustomCourseName] = useState('');
+  const [format, setFormat] = useState<Format>('individual');
   const [gameMode, setGameMode] = useState<GameMode>('stroke-play');
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([activePlayer?.id || '']);
   const [showPlayerPicker, setShowPlayerPicker] = useState(false);
@@ -40,7 +41,13 @@ export default function NewRoundForm() {
   const [parInputs, setParInputs] = useState<number[]>(DEFAULT_PARS_18);
   const [customPars, setCustomPars] = useState(false);
 
-  const needsTwoPlayers = isTwoPlayerMode(gameMode);
+  const filteredGameModes = GAME_MODES.filter((gm) => gm.format === format)
+
+  const isPlayerCountValid = (() => {
+    if (format === 'individual') return selectedPlayerIds.length >= 1 && selectedPlayerIds.length <= 4
+    if (format === 'parejas') return selectedPlayerIds.length === 2 || selectedPlayerIds.length === 4
+    return selectedPlayerIds.length >= 1
+  })()
 
   const selectedCourse = selectedCourseId
     ? courses.find((c) => c.id === selectedCourseId)
@@ -136,7 +143,7 @@ export default function NewRoundForm() {
     ? selectedCourse.name
     : customCourseName;
   const selectedPlayers = getSelectedPlayers();
-  const canStart = courseName.trim().length > 0 && selectedPlayers.length > 0;
+  const canStart = courseName.trim().length > 0 && selectedPlayers.length > 0 && isPlayerCountValid;
 
   const availableTees = selectedCourse
     ? selectedCourse.tees
@@ -145,13 +152,42 @@ export default function NewRoundForm() {
 
   return (
     <div className="space-y-5">
+      {/* Format */}
+      <div>
+        <label className="mb-1 block text-sm font-medium text-zinc-500">
+          {t('newRound.format')}
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {(['individual', 'parejas', 'equipos'] as Format[]).map((f) => (
+            <button
+              key={f}
+              onClick={() => {
+                setFormat(f)
+                const firstMode = GAME_MODES.find((gm) => gm.format === f)
+                if (firstMode) setGameMode(firstMode.mode)
+              }}
+              className={`rounded-xl p-2.5 text-left transition-all active:scale-95 ${
+                format === f
+                  ? 'bg-emerald-500 text-white shadow-sm'
+                  : 'border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900'
+              }`}
+            >
+              <span className="block text-xs font-bold">{t(`newRound.${f}`)}</span>
+              <span className={`block text-[10px] ${format === f ? 'text-white/70' : 'text-zinc-400'}`}>
+                {t(`newRound.${f}Desc`)}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Game Mode */}
       <div>
         <label className="mb-1 block text-sm font-medium text-zinc-500">
           {t('newRound.gameMode')}
         </label>
         <div className="grid grid-cols-2 gap-2">
-          {GAME_MODES.map(({ mode, labelKey, descKey }) => (
+          {filteredGameModes.map(({ mode, labelKey, descKey }) => (
             <button
               key={mode}
               onClick={() => setGameMode(mode)}
@@ -178,7 +214,10 @@ export default function NewRoundForm() {
         <div className="flex flex-wrap gap-1.5">
           {allPlayers.map((p) => {
             const isSelected = selectedPlayerIds.includes(p.id);
-            const isDisabled = needsTwoPlayers && selectedPlayerIds.length >= 2 && !isSelected;
+            const maxReached = format === 'individual' ? selectedPlayerIds.length >= 4
+              : format === 'parejas' ? (selectedPlayerIds.length >= 4 || (selectedPlayerIds.length === 2 && !isSelected))
+              : false
+            const isDisabled = maxReached && !isSelected
             return (
               <button
                 key={p.id}
@@ -206,10 +245,13 @@ export default function NewRoundForm() {
             </Link>
           )}
         </div>
-        {needsTwoPlayers && selectedPlayerIds.length < 2 && (
+        {format === 'parejas' && selectedPlayerIds.length > 0 && selectedPlayerIds.length !== 2 && selectedPlayerIds.length !== 4 && (
           <p className="mt-1 text-[10px] text-amber-500">
             {t('newRound.addSecondPlayer')}
           </p>
+        )}
+        {format === 'individual' && selectedPlayerIds.length > 4 && (
+          <p className="mt-1 text-[10px] text-amber-500">Max 4 players</p>
         )}
       </div>
 
