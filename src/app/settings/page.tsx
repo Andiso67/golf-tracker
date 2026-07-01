@@ -546,7 +546,7 @@ function SettingsContent() {
         <section className="pb-6 text-center">
           <div className="flex items-center justify-center gap-1.5 text-xs text-zinc-400">
             <SettingsIcon size={12} />
-            <span>Golf Tracker v0.1.0</span>
+            <span>Golf Tracker v1.0.0</span>
           </div>
         </section>
       </div>
