@@ -2,8 +2,15 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { hashPassword, createSession, createVerificationToken } from '@/lib/auth'
 import { registerSchema, formatZodErrors } from '@/lib/validations'
+import { checkRateLimit, extractIp, rateLimitResponse } from '@/lib/rateLimit'
 
 export async function POST(req: Request) {
+  const ip = extractIp(req)
+  const { allowed, retryAfter } = checkRateLimit(ip, 3, 3600000)
+  if (!allowed) {
+    return rateLimitResponse(retryAfter)
+  }
+
   const body = await req.json()
   const result = registerSchema.safeParse(body)
   if (!result.success) {

@@ -2,8 +2,15 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyPassword, createSession } from '@/lib/auth'
 import { loginSchema, formatZodErrors } from '@/lib/validations'
+import { checkRateLimit, extractIp, rateLimitResponse } from '@/lib/rateLimit'
 
 export async function POST(req: Request) {
+  const ip = extractIp(req)
+  const { allowed, retryAfter } = checkRateLimit(ip, 5, 60000)
+  if (!allowed) {
+    return rateLimitResponse(retryAfter)
+  }
+
   const body = await req.json()
   const result = loginSchema.safeParse(body)
   if (!result.success) {
