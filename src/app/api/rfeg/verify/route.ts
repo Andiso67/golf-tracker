@@ -33,7 +33,7 @@ function parseRfegResponse(html: string, licenseNumber: string): { rfegName: str
 
   return {
     rfegName: cells[licIdx - 1],
-    handicap: cells[licIdx + 1],
+    handicap: cells[licIdx + 1].replace(',', '.'),
     estado: cells[licIdx + 2],
     fecha: cells[licIdx + 3],
   }
