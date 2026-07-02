@@ -5,39 +5,44 @@ import { loginSchema, formatZodErrors } from '@/lib/validations'
 import { checkRateLimit, extractIp, rateLimitResponse } from '@/lib/rateLimit'
 
 export async function POST(req: Request) {
-  const ip = extractIp(req)
-  const { allowed, retryAfter } = checkRateLimit(ip, 10, 60000)
-  if (!allowed) {
-    return rateLimitResponse(retryAfter)
+  try {
+    const ip = extractIp(req)
+    const { allowed, retryAfter } = checkRateLimit(ip, 5, 60000)
+    if (!allowed) {
+      return rateLimitResponse(retryAfter)
+    }
+
+    const body = await req.json()
+    const result = loginSchema.safeParse(body)
+    if (!result.success) {
+      return NextResponse.json({ error: formatZodErrors(result.error) }, { status: 400 })
+    }
+    const { email, password } = result.data
+
+    const user = await prisma.user.findUnique({ where: { email } })
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
+    }
+
+    const valid = await verifyPassword(password, user.passwordHash)
+    if (!valid) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
+    }
+
+    const sessionToken = await createSession(user.id)
+
+    const response = NextResponse.json({
+      userId: user.id,
+      firstName: user.firstName,
+      lastName1: user.lastName1,
+      lastName2: user.lastName2,
+      email: user.email,
+      role: user.role,
+      emailVerified: user.emailVerified?.toISOString() || null,
+    })
+    response.cookies.set(SESSION_COOKIE, sessionToken, SESSION_COOKIE_OPTIONS)
+    return response
+  } catch {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-
-  const body = await req.json()
-  const result = loginSchema.safeParse(body)
-  if (!result.success) {
-    return NextResponse.json({ error: formatZodErrors(result.error) }, { status: 400 })
-  }
-  const { email, password } = result.data
-
-  const user = await prisma.user.findUnique({ where: { email } })
-  if (!user) {
-    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
-  }
-
-  const valid = await verifyPassword(password, user.passwordHash)
-  if (!valid) {
-    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
-  }
-
-  const sessionToken = await createSession(user.id)
-
-  const response = NextResponse.json({
-    userId: user.id,
-    firstName: user.firstName,
-    lastName1: user.lastName1,
-    lastName2: user.lastName2,
-    email: user.email,
-    emailVerified: user.emailVerified?.toISOString() || null,
-  })
-  response.cookies.set(SESSION_COOKIE, sessionToken, SESSION_COOKIE_OPTIONS)
-  return response
 }

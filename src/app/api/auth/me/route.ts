@@ -17,6 +17,7 @@ export async function GET(req: Request) {
       lastName1: user.lastName1,
       lastName2: user.lastName2,
       email: user.email,
+      role: user.role,
       emailVerified: user.emailVerified?.toISOString() || null,
     })
   } catch {

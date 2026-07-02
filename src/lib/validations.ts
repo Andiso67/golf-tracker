@@ -105,6 +105,21 @@ export const updateUserSchema = z.object({
   password: z.string().min(6).optional(),
 })
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+})
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  token: z.string().min(1, 'Token is required'),
+  password: passwordSchema,
+})
+
+export const verifyEmailSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  token: z.string().min(1, 'Token is required'),
+})
+
 export const createCourseSchema = z.object({
   name: z.string().min(1, 'Course name is required'),
   tees: z.array(

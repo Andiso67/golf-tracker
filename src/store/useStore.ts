@@ -687,6 +687,10 @@ export const useStore = create<GolfStore>()(
     {
       name: 'golf-tracker-storage',
       storage: createJSONStorage(() => ssrSafeStorage),
+      partialize: (state) => {
+        const { auth, _hydrated, _syncing, ...rest } = state
+        return rest
+      },
       onRehydrateStorage: () => (state) => {
         if (state) {
           // Migrate single player

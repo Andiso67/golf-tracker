@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
         return;
       }
 
-      if (data.resetUrl) {
+      if (data.resetUrl && process.env.NODE_ENV === 'development') {
         console.log('[PASSWORD RESET] Link:', data.resetUrl);
       }
       setSent(true);

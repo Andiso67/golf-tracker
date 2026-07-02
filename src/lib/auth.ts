@@ -151,7 +151,7 @@ export async function createSession(userId: string): Promise<string> {
 
   await prisma.user.update({
     where: { id: userId },
-    data: { verificationToken: token },
+    data: { sessionToken: token },
   })
 
   return token
@@ -160,14 +160,34 @@ export async function createSession(userId: string): Promise<string> {
 export async function verifySession(token: string): Promise<string | null> {
   if (!token) return null
   const user = await prisma.user.findFirst({
-    where: { verificationToken: token },
+    where: { sessionToken: token },
   })
   return user?.id || null
+}
+
+export async function getUserRole(userId: string): Promise<string | null> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  })
+  return user?.role || null
+}
+
+export async function requireAdmin(userId: string): Promise<void> {
+  const role = await getUserRole(userId)
+  if (role !== 'admin') {
+    throw new AuthError('Admin access required')
+  }
+}
+
+export async function requireAdminOrOwner(userId: string, targetUserId: string): Promise<void> {
+  if (userId === targetUserId) return
+  await requireAdmin(userId)
 }
 
 export async function destroySession(userId: string): Promise<void> {
   await prisma.user.update({
     where: { id: userId },
-    data: { verificationToken: null },
+    data: { sessionToken: null },
   })
 }

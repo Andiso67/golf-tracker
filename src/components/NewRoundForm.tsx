@@ -16,7 +16,7 @@ import {
 } from '@/types';
 import type { SavedCourse, CourseTee, Player } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
-import { ChevronDown, MapPin, Plus, User } from 'lucide-react';
+import { ChevronDown, MapPin, Plus, User, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function NewRoundForm() {
@@ -34,6 +34,7 @@ export default function NewRoundForm() {
   const [format, setFormat] = useState<Format>('individual');
   const [gameMode, setGameMode] = useState<GameMode>('stroke-play');
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([activePlayer?.id || '']);
+  const [selectedPlayer, setSelectedPlayer] = useState('');
   const [showPlayerPicker, setShowPlayerPicker] = useState(false);
 
   const [selectedTee, setSelectedTee] = useState<string | null>(null);
@@ -78,12 +79,16 @@ export default function NewRoundForm() {
     setCustomPars(false);
   };
 
-  const togglePlayer = (playerId: string) => {
-    setSelectedPlayerIds((prev) =>
-      prev.includes(playerId)
-        ? prev.filter((id) => id !== playerId)
-        : [...prev, playerId]
-    );
+  const handleAddPlayer = () => {
+    if (!selectedPlayer || selectedPlayerIds.includes(selectedPlayer)) return;
+    if (format === 'individual' && selectedPlayerIds.length >= 4) return;
+    if (format === 'parejas' && selectedPlayerIds.length >= 4) return;
+    setSelectedPlayerIds((prev) => [...prev, selectedPlayer]);
+    setSelectedPlayer('');
+  };
+
+  const handleRemovePlayer = (id: string) => {
+    setSelectedPlayerIds((prev) => prev.filter((pid) => pid !== id));
   };
 
   const handleSelectTee = (tee: CourseTee) => {
@@ -211,47 +216,61 @@ export default function NewRoundForm() {
         <label className="mb-1 block text-sm font-medium text-zinc-500">
           {t('newRound.playerSelect')}
         </label>
-        <div className="flex flex-wrap gap-1.5">
-          {allPlayers.map((p) => {
-            const isSelected = selectedPlayerIds.includes(p.id);
-            const maxReached = format === 'individual' ? selectedPlayerIds.length >= 4
-              : format === 'parejas' ? (selectedPlayerIds.length >= 4 || (selectedPlayerIds.length === 2 && !isSelected))
-              : false
-            const isDisabled = maxReached && !isSelected
-            return (
-              <button
-                key={p.id}
-                onClick={() => togglePlayer(p.id)}
-                disabled={isDisabled}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                  isSelected
-                    ? 'bg-emerald-500 text-white'
-                    : isDisabled
-                      ? 'cursor-not-allowed bg-zinc-50 text-zinc-300 dark:bg-zinc-800'
-                      : 'border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900'
-                }`}
-              >
-                <User size={12} />
-                {playerFullName(p)}
-              </button>
-            );
-          })}
-          {allPlayers.length === 0 && (
-            <Link
-              href="/settings"
-              className="text-xs font-medium text-emerald-600 dark:text-emerald-400"
-            >
-              {t('settings.addFirstPlayer')}
-            </Link>
-          )}
+        <div className="flex gap-2">
+          <select
+            value={selectedPlayer}
+            onChange={(e) => setSelectedPlayer(e.target.value)}
+            className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800"
+          >
+            <option value="">{t('newRound.selectPlayer')}</option>
+            {allPlayers
+              .filter((p) => !selectedPlayerIds.includes(p.id))
+              .map((p) => (
+                <option key={p.id} value={p.id}>{playerFullName(p)}</option>
+              ))}
+          </select>
+          <button
+            onClick={handleAddPlayer}
+            disabled={!selectedPlayer || (format === 'individual' && selectedPlayerIds.length >= 4) || (format === 'parejas' && selectedPlayerIds.length >= 4)}
+            className="shrink-0 rounded-lg bg-emerald-500 px-4 py-2 text-xs font-bold text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-300 dark:disabled:bg-zinc-800"
+          >
+            {t('players.addPlayer')}
+          </button>
         </div>
+
+        {selectedPlayerIds.length > 0 && (
+          <div className="mt-2 space-y-1">
+            {selectedPlayerIds.map((id) => {
+              const p = allPlayers.find((pl) => pl.id === id);
+              if (!p) return null;
+              return (
+                <div key={id} className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                  <span className="text-sm font-medium">{playerFullName(p)}</span>
+                  <button
+                    onClick={() => handleRemovePlayer(id)}
+                    className="text-zinc-400 transition-colors hover:text-rose-500"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {allPlayers.length === 0 && (
+          <Link
+            href="/settings"
+            className="mt-2 inline-block text-xs font-medium text-emerald-600 dark:text-emerald-400"
+          >
+            {t('settings.addFirstPlayer')}
+          </Link>
+        )}
+
         {format === 'parejas' && selectedPlayerIds.length > 0 && selectedPlayerIds.length !== 2 && selectedPlayerIds.length !== 4 && (
           <p className="mt-1 text-[10px] text-amber-500">
             {t('newRound.addSecondPlayer')}
           </p>
-        )}
-        {format === 'individual' && selectedPlayerIds.length > 4 && (
-          <p className="mt-1 text-[10px] text-amber-500">Max 4 players</p>
         )}
       </div>
 
