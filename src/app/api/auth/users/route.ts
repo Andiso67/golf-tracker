@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { hashPassword, getAuthenticatedUserId, handleAuthError } from '@/lib/auth'
+import { hashPassword, getAuthenticatedUserId, requireAdmin, handleAuthError } from '@/lib/auth'
 import { createUserSchema, formatZodErrors } from '@/lib/validations'
 
 export async function GET(req: Request) {
   try {
-    await getAuthenticatedUserId(req)
+    const userId = await getAuthenticatedUserId(req)
+    await requireAdmin(userId)
     const users = await prisma.user.findMany({
       select: {
         id: true,
@@ -13,6 +14,7 @@ export async function GET(req: Request) {
         lastName1: true,
         lastName2: true,
         email: true,
+        role: true,
         emailVerified: true,
         createdAt: true,
       },
@@ -26,7 +28,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    await getAuthenticatedUserId(req)
+    const userId = await getAuthenticatedUserId(req)
+    await requireAdmin(userId)
     const body = await req.json()
     const result = createUserSchema.safeParse(body)
     if (!result.success) {

@@ -30,11 +30,15 @@ model User {
   lastName1   String   @default("")
   lastName2   String   @default("")
   emailVerified DateTime?
+  role        String   @default("user")
+  sessionToken String?  @unique
   verificationToken String?
   resetPasswordToken String?
   resetPasswordExpires DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([sessionToken])
 }
 
 model Player {

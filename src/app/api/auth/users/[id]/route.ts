@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { hashPassword, getAuthenticatedUserId, handleAuthError } from '@/lib/auth'
+import { hashPassword, getAuthenticatedUserId, requireAdmin, requireAdminOrOwner, handleAuthError } from '@/lib/auth'
 import { updateUserSchema, formatZodErrors } from '@/lib/validations'
 
 export async function PUT(
@@ -8,8 +8,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await getAuthenticatedUserId(req)
+    const authUserId = await getAuthenticatedUserId(req)
     const { id } = await params
+    await requireAdminOrOwner(authUserId, id)
     const body = await req.json()
     const result = updateUserSchema.safeParse(body)
     if (!result.success) {
@@ -61,7 +62,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await getAuthenticatedUserId(req)
+    const authUserId = await getAuthenticatedUserId(req)
+    await requireAdmin(authUserId)
     const { id } = await params
 
     const existing = await prisma.user.findUnique({ where: { id } })
