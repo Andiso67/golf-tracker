@@ -20,11 +20,13 @@ export async function getCourse(id: string): Promise<SavedCourse | null> {
 
 export async function createCourse(
   name: string,
-  tees: CourseTee[]
+  tees: CourseTee[],
+  imageUrl?: string
 ): Promise<SavedCourse> {
   const course = await prisma.course.create({
     data: {
       name,
+      imageUrl: imageUrl || '',
       tees: {
         create: tees.map((t) => ({
           name: t.name,
@@ -42,7 +44,7 @@ export async function createCourse(
 
 export async function updateCourse(
   id: string,
-  data: { name?: string; tees?: CourseTee[] }
+  data: { name?: string; imageUrl?: string; tees?: CourseTee[] }
 ): Promise<SavedCourse | null> {
   if (data.tees) {
     await prisma.tee.deleteMany({ where: { courseId: id } })
@@ -57,9 +59,12 @@ export async function updateCourse(
       })),
     })
   }
+  const updateData: Record<string, any> = {}
+  if (data.name !== undefined) updateData.name = data.name
+  if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl
   const course = await prisma.course.update({
     where: { id },
-    data: { name: data.name },
+    data: updateData,
     include: { tees: true },
   })
   return mapCourse(course)
@@ -129,6 +134,7 @@ function mapCourse(course: any): SavedCourse {
   return {
     id: course.id,
     name: course.name,
+    imageUrl: course.imageUrl || '',
     tees: course.tees.map((t: any) => ({
       name: t.name,
       rating: t.rating,

@@ -116,6 +116,7 @@ export interface CourseTee {
 export interface SavedCourse {
   id: string;
   name: string;
+  imageUrl: string;
   tees: CourseTee[];
   createdAt: string;
 }

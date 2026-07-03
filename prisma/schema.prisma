@@ -71,6 +71,7 @@ model VerificationToken {
 model Course {
   id        String   @id @default(cuid())
   name      String
+  imageUrl  String   @default("")
   createdAt DateTime @default(now())
 
   tees      Tee[]

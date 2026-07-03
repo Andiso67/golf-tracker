@@ -26,6 +26,7 @@ function CourseEditor({
   );
 
   const [name, setName] = useState(existing?.name || '');
+  const [imageUrl, setImageUrl] = useState(existing?.imageUrl || '');
   const [tees, setTees] = useState<CourseTee[]>(
     existing?.tees || [
       {
@@ -90,9 +91,9 @@ function CourseEditor({
   const handleSave = () => {
     if (!name.trim()) return;
     if (editId) {
-      updateCourse(editId, { name: name.trim(), tees });
+      updateCourse(editId, { name: name.trim(), imageUrl: imageUrl.trim(), tees });
     } else {
-      addCourse(name.trim(), tees);
+      addCourse(name.trim(), tees, imageUrl.trim() || undefined);
     }
     onDone();
   };
@@ -107,7 +108,7 @@ function CourseEditor({
       <div className="mb-4 flex items-center justify-between">
         <button
           onClick={onDone}
-          className="inline-flex items-center gap-1 text-sm text-zinc-400"
+          className="inline-flex items-center gap-1 text-sm text-ft-muted"
         >
           <ArrowLeft size={16} />
           {t('courses.back')}
@@ -117,8 +118,8 @@ function CourseEditor({
           disabled={!name.trim()}
           className={`rounded-lg px-4 py-2 text-sm font-bold ${
             name.trim()
-              ? 'bg-emerald-500 text-white'
-              : 'bg-zinc-100 text-zinc-300 dark:bg-zinc-800'
+              ? 'bg-ft-green text-white'
+              : 'bg-ft-surface text-ft-muted'
           }`}
         >
           {editId ? t('courses.save') : t('courses.add')}
@@ -130,7 +131,7 @@ function CourseEditor({
       </h1>
 
       <div className="mb-4">
-        <label className="mb-1 block text-sm font-medium text-zinc-500">
+        <label className="mb-1 block text-sm font-medium text-ft-muted">
           {t('courses.courseName')}
         </label>
         <input
@@ -138,19 +139,44 @@ function CourseEditor({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t('courses.courseNamePlaceholder')}
-          className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900"
+          className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-lg placeholder-ft-muted focus:border-ft-green focus:outline-none"
         />
       </div>
 
       <div className="mb-4">
+        <label className="mb-1 block text-sm font-medium text-ft-muted">
+          Image URL
+        </label>
+        <input
+          type="text"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          placeholder="https://example.com/course-image.jpg"
+          className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-2.5 text-sm placeholder-ft-muted focus:border-ft-green focus:outline-none"
+        />
+        {imageUrl && (
+          <div className="mt-2 overflow-hidden rounded-xl">
+            <img
+              src={imageUrl}
+              alt={name || 'Course preview'}
+              className="h-32 w-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="mb-4">
         <div className="mb-2 flex items-center justify-between">
-          <label className="text-sm font-medium text-zinc-500">
+          <label className="text-sm font-medium text-ft-muted">
             {t('courses.tees')}
           </label>
           {availableTees.length > 0 && (
             <button
               onClick={() => setAddingTee(!addingTee)}
-              className="text-sm font-medium text-emerald-600 dark:text-emerald-400"
+              className="text-sm font-medium text-ft-green-bright"
             >
               + {t('courses.addTee')}
             </button>
@@ -163,7 +189,7 @@ function CourseEditor({
               <button
                 key={tn}
                 onClick={() => handleAddTee(tn)}
-                className="rounded-lg border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600 dark:border-zinc-700"
+                className="rounded-lg border border-ft-border px-2.5 py-1 text-xs font-medium text-ft-label"
               >
                 {tn}
               </button>
@@ -175,14 +201,14 @@ function CourseEditor({
           {tees.map((tee, ti) => (
             <div
               key={tee.name}
-              className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
+              className="rounded-xl border border-ft-border bg-ft-surface p-3"
             >
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-sm font-bold">{tee.name}</span>
                 {tees.length > 1 && (
                   <button
                     onClick={() => handleRemoveTee(tee.name)}
-                    className="text-rose-400"
+                    className="text-ft-rose"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -191,7 +217,7 @@ function CourseEditor({
 
               <div className="mb-2 flex gap-2">
                 <div className="flex-1">
-                  <label className="text-[10px] text-zinc-400">
+                  <label className="text-[10px] text-ft-muted">
                     {t('courses.rating')}
                   </label>
                   <input
@@ -202,11 +228,11 @@ function CourseEditor({
                     onChange={(e) =>
                       handleRatingChange(ti, parseFloat(e.target.value) || 0)
                     }
-                    className="w-full rounded border border-zinc-100 bg-zinc-50 px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+                    className="w-full rounded border border-ft-border bg-ft-surface px-2 py-1 text-sm"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="text-[10px] text-zinc-400">
+                  <label className="text-[10px] text-ft-muted">
                     {t('courses.slope')}
                   </label>
                   <input
@@ -216,12 +242,12 @@ function CourseEditor({
                     onChange={(e) =>
                       handleSlopeChange(ti, parseInt(e.target.value) || 0)
                     }
-                    className="w-full rounded border border-zinc-100 bg-zinc-50 px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+                    className="w-full rounded border border-ft-border bg-ft-surface px-2 py-1 text-sm"
                   />
                 </div>
               </div>
 
-              <label className="text-[10px] text-zinc-400">
+              <label className="text-[10px] text-ft-muted">
                 {t('courses.pars')}
               </label>
               <div
@@ -234,7 +260,7 @@ function CourseEditor({
               >
                 {tee.pars.map((par, hi) => (
                   <div key={hi} className="text-center">
-                    <span className="text-[9px] text-zinc-400">{hi + 1}</span>
+                    <span className="text-[9px] text-ft-muted">{hi + 1}</span>
                     <input
                       type="number"
                       inputMode="numeric"
@@ -244,12 +270,12 @@ function CourseEditor({
                       onChange={(e) =>
                         handleParChange(ti, hi, parseInt(e.target.value))
                       }
-                      className="w-full rounded border border-zinc-100 bg-zinc-50 py-0.5 text-center text-xs dark:border-zinc-700 dark:bg-zinc-800"
+                      className="w-full rounded border border-ft-border bg-ft-surface py-0.5 text-center text-xs"
                     />
                   </div>
                 ))}
               </div>
-              <p className="mt-1 text-[10px] text-zinc-400">
+              <p className="mt-1 text-[10px] text-ft-muted">
                 {t('courses.totalPar')}: {tee.pars.reduce((a, b) => a + b, 0)}
               </p>
             </div>
@@ -314,7 +340,7 @@ function CoursesList() {
         <div>
           <Link
             href="/"
-            className="mb-1 inline-flex items-center gap-1 text-sm text-zinc-400"
+            className="mb-1 inline-flex items-center gap-1 text-sm text-ft-muted"
           >
             <ArrowLeft size={16} />
             {t('courses.back')}
@@ -325,7 +351,7 @@ function CoursesList() {
         </div>
         <button
           onClick={() => setAdding(true)}
-          className="flex items-center gap-1 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white"
+          className="flex items-center gap-1 rounded-xl bg-ft-green px-4 py-2 text-sm font-bold text-white"
         >
           <Plus size={18} />
           {t('courses.addCourse')}
@@ -335,7 +361,7 @@ function CoursesList() {
       <button
         onClick={handleImport}
         disabled={importing}
-        className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 bg-white py-2.5 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+        className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-ft-border bg-ft-surface py-2.5 text-sm font-medium text-ft-muted transition-colors hover:bg-ft-surface"
       >
         <Download size={16} className={importing ? 'animate-bounce' : ''} />
         {importing ? t('courses.importing') : t('courses.importRfeg')}
@@ -345,7 +371,7 @@ function CoursesList() {
         <motion.p
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-3 text-center text-sm text-emerald-600 dark:text-emerald-400"
+          className="mb-3 text-center text-sm text-ft-green-bright"
         >
           {importMsg}
         </motion.p>
@@ -353,12 +379,12 @@ function CoursesList() {
 
 
       {courses.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-zinc-200 py-12 text-center dark:border-zinc-800">
-          <MapPin size={40} className="text-zinc-300 dark:text-zinc-600" />
-          <p className="text-sm text-zinc-400">{t('courses.noCourses')}</p>
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-ft-border py-12 text-center">
+          <MapPin size={40} className="text-ft-muted" />
+          <p className="text-sm text-ft-muted">{t('courses.noCourses')}</p>
           <button
             onClick={() => setAdding(true)}
-            className="text-sm font-medium text-emerald-600 dark:text-emerald-400"
+            className="text-sm font-medium text-ft-green-bright"
           >
             {t('courses.addFirst')}
           </button>
@@ -368,45 +394,53 @@ function CoursesList() {
           {courses.map((course) => (
             <div
               key={course.id}
-              className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
+              className="relative overflow-hidden rounded-xl border border-ft-border"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-base font-bold">{course.name}</p>
-                  <p className="text-xs text-zinc-400">
-                    {course.tees.length}{' '}
-                    {course.tees.length === 1
-                      ? t('courses.tee')
-                      : t('courses.tees')}
-                    {' · '}
-                    {course.tees[0]?.totalHoles || 18}{' '}
-                    {t('courses.holes')}
-                  </p>
+              {course.imageUrl && (
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${course.imageUrl})` }}
+                />
+              )}
+              <div className={`relative p-3 ${course.imageUrl ? 'bg-gradient-to-r from-black/70 to-black/40' : 'bg-ft-surface'}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`text-base font-bold ${course.imageUrl ? 'text-white' : ''}`}>{course.name}</p>
+                    <p className={`text-xs ${course.imageUrl ? 'text-white/70' : 'text-ft-muted'}`}>
+                      {course.tees.length}{' '}
+                      {course.tees.length === 1
+                        ? t('courses.tee')
+                        : t('courses.tees')}
+                      {' · '}
+                      {course.tees[0]?.totalHoles || 18}{' '}
+                      {t('courses.holes')}
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setEditing(course.id)}
+                      className={`rounded-lg p-2 ${course.imageUrl ? 'text-white/70 hover:bg-white/10' : 'text-ft-muted hover:bg-ft-surface'}`}
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={() => deleteCourse(course.id)}
+                      className="rounded-lg p-2 text-ft-rose hover:bg-ft-rose/10"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => setEditing(course.id)}
-                    className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    onClick={() => deleteCourse(course.id)}
-                    className="rounded-lg p-2 text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                <div className={`mt-1 flex flex-wrap gap-1 ${course.imageUrl ? 'text-white/70' : ''}`}>
+                  {course.tees.map((tee) => (
+                    <span
+                      key={tee.name}
+                      className={`rounded-full px-2 py-0.5 text-[10px] ${course.imageUrl ? 'bg-white/20 text-white/90' : 'bg-ft-surface text-ft-muted'}`}
+                    >
+                      {tee.name} (R:{tee.rating} S:{tee.slope})
+                    </span>
+                  ))}
                 </div>
-              </div>
-              <div className="mt-1 flex flex-wrap gap-1">
-                {course.tees.map((tee) => (
-                  <span
-                    key={tee.name}
-                    className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] text-zinc-500 dark:bg-zinc-800"
-                  >
-                    {tee.name} (R:{tee.rating} S:{tee.slope})
-                  </span>
-                ))}
               </div>
             </div>
           ))}
@@ -423,7 +457,7 @@ export default function CoursesPage() {
         <Suspense
           fallback={
             <div className="mx-auto flex max-w-lg flex-1 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+              <div               className="h-8 w-8 animate-spin rounded-full border-2 border-ft-green-bright border-t-transparent" />
             </div>
           }
         >

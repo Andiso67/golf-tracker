@@ -122,6 +122,7 @@ export const verifyEmailSchema = z.object({
 
 export const createCourseSchema = z.object({
   name: z.string().min(1, 'Course name is required'),
+  imageUrl: z.string().optional(),
   tees: z.array(
     z.object({
       name: z.string().min(1),
@@ -135,6 +136,7 @@ export const createCourseSchema = z.object({
 
 export const updateCourseSchema = z.object({
   name: z.string().optional(),
+  imageUrl: z.string().optional(),
   tees: z
     .array(
       z.object({

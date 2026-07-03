@@ -19,8 +19,8 @@ export async function POST(req: Request) {
     if (!result.success) {
       return NextResponse.json({ error: formatZodErrors(result.error) }, { status: 400 })
     }
-    const { name, tees } = result.data
-    const course = await createCourse(name, tees)
+    const { name, tees, imageUrl } = result.data
+    const course = await createCourse(name, tees, imageUrl)
     return NextResponse.json(course, { status: 201 })
   } catch (error) {
     return handleAuthError(error)

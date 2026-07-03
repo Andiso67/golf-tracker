@@ -25,6 +25,7 @@ export default function NewRoundForm() {
   const allPlayers = useStore((s) => s.players);
   const activePlayer = useStore((s) => s.player);
   const startRound = useStore((s) => s.startRound);
+  const addPlayer = useStore((s) => s.addPlayer);
   const { t } = useTranslation();
 
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
@@ -36,6 +37,11 @@ export default function NewRoundForm() {
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([activePlayer?.id || '']);
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [showPlayerPicker, setShowPlayerPicker] = useState(false);
+  const [showNewPlayerForm, setShowNewPlayerForm] = useState(false);
+  const [npFirstName, setNpFirstName] = useState('');
+  const [npLastName1, setNpLastName1] = useState('');
+  const [npLastName2, setNpLastName2] = useState('');
+  const [npLicenseNumber, setNpLicenseNumber] = useState('');
 
   const [selectedTee, setSelectedTee] = useState<string | null>(null);
   const [totalHoles, setTotalHoles] = useState<9 | 18>(18);
@@ -89,6 +95,17 @@ export default function NewRoundForm() {
 
   const handleRemovePlayer = (id: string) => {
     setSelectedPlayerIds((prev) => prev.filter((pid) => pid !== id));
+  };
+
+  const handleCreatePlayer = () => {
+    if (!npFirstName.trim()) return;
+    const id = addPlayer(npFirstName.trim(), npLastName1.trim(), npLastName2.trim(), npLicenseNumber.trim());
+    setSelectedPlayerIds((prev) => [...prev, id]);
+    setNpFirstName('');
+    setNpLastName1('');
+    setNpLastName2('');
+    setNpLicenseNumber('');
+    setShowNewPlayerForm(false);
   };
 
   const handleSelectTee = (tee: CourseTee) => {
@@ -159,7 +176,7 @@ export default function NewRoundForm() {
     <div className="space-y-5">
       {/* Format */}
       <div>
-        <label className="mb-1 block text-sm font-medium text-zinc-500">
+        <label className="mb-1 block text-sm font-medium text-ft-muted">
           {t('newRound.format')}
         </label>
         <div className="grid grid-cols-3 gap-2">
@@ -173,12 +190,12 @@ export default function NewRoundForm() {
               }}
               className={`rounded-xl p-2.5 text-left transition-all active:scale-95 ${
                 format === f
-                  ? 'bg-emerald-500 text-white shadow-sm'
-                  : 'border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900'
+                  ? 'bg-ft-green text-white shadow-sm'
+                  : 'border border-ft-border bg-ft-surface border-ft-border bg-ft-card'
               }`}
             >
               <span className="block text-xs font-bold">{t(`newRound.${f}`)}</span>
-              <span className={`block text-[10px] ${format === f ? 'text-white/70' : 'text-zinc-400'}`}>
+              <span className={`block text-[10px] ${format === f ? 'text-white/70' : 'text-ft-muted'}`}>
                 {t(`newRound.${f}Desc`)}
               </span>
             </button>
@@ -188,7 +205,7 @@ export default function NewRoundForm() {
 
       {/* Game Mode */}
       <div>
-        <label className="mb-1 block text-sm font-medium text-zinc-500">
+        <label className="mb-1 block text-sm font-medium text-ft-muted">
           {t('newRound.gameMode')}
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -198,12 +215,12 @@ export default function NewRoundForm() {
               onClick={() => setGameMode(mode)}
               className={`rounded-xl p-2.5 text-left transition-all active:scale-95 ${
                 gameMode === mode
-                  ? 'bg-emerald-500 text-white shadow-sm'
-                  : 'border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900'
+                  ? 'bg-ft-green text-white shadow-sm'
+                  : 'border border-ft-border bg-ft-surface border-ft-border bg-ft-card'
               }`}
             >
               <span className="block text-xs font-bold">{t(labelKey)}</span>
-              <span className={`block text-[10px] ${gameMode === mode ? 'text-white/70' : 'text-zinc-400'}`}>
+              <span className={`block text-[10px] ${gameMode === mode ? 'text-white/70' : 'text-ft-muted'}`}>
                 {t(descKey)}
               </span>
             </button>
@@ -213,14 +230,14 @@ export default function NewRoundForm() {
 
       {/* Player Selection */}
       <div>
-        <label className="mb-1 block text-sm font-medium text-zinc-500">
+        <label className="mb-1 block text-sm font-medium text-ft-muted">
           {t('newRound.playerSelect')}
         </label>
         <div className="flex gap-2">
           <select
             value={selectedPlayer}
             onChange={(e) => setSelectedPlayer(e.target.value)}
-            className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800"
+            className="flex-1 rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20 border-ft-border bg-ft-surface"
           >
             <option value="">{t('newRound.selectPlayer')}</option>
             {allPlayers
@@ -230,11 +247,17 @@ export default function NewRoundForm() {
               ))}
           </select>
           <button
-            onClick={handleAddPlayer}
-            disabled={!selectedPlayer || (format === 'individual' && selectedPlayerIds.length >= 4) || (format === 'parejas' && selectedPlayerIds.length >= 4)}
-            className="shrink-0 rounded-lg bg-emerald-500 px-4 py-2 text-xs font-bold text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-300 dark:disabled:bg-zinc-800"
+            onClick={() => {
+              if (selectedPlayer) {
+                handleAddPlayer();
+              } else {
+                setShowNewPlayerForm(!showNewPlayerForm);
+              }
+            }}
+            disabled={!!selectedPlayer && ((format === 'individual' && selectedPlayerIds.length >= 4) || (format === 'parejas' && selectedPlayerIds.length >= 4))}
+            className="shrink-0 rounded-lg bg-ft-green px-4 py-2 text-xs font-bold text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:bg-ft-surface disabled:text-ft-muted"
           >
-            {t('players.addPlayer')}
+            {selectedPlayer ? t('players.addPlayer') : <><Plus size={16} /> {t('players.addPlayer')}</>}
           </button>
         </div>
 
@@ -244,11 +267,11 @@ export default function NewRoundForm() {
               const p = allPlayers.find((pl) => pl.id === id);
               if (!p) return null;
               return (
-                <div key={id} className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                <div key={id} className="flex items-center justify-between rounded-lg bg-ft-surface px-3 py-2 bg-ft-surface">
                   <span className="text-sm font-medium">{playerFullName(p)}</span>
                   <button
                     onClick={() => handleRemovePlayer(id)}
-                    className="text-zinc-400 transition-colors hover:text-rose-500"
+                    className="text-ft-muted transition-colors hover:text-ft-rose"
                   >
                     <X size={14} />
                   </button>
@@ -258,17 +281,66 @@ export default function NewRoundForm() {
           </div>
         )}
 
-        {allPlayers.length === 0 && (
-          <Link
-            href="/settings"
-            className="mt-2 inline-block text-xs font-medium text-emerald-600 dark:text-emerald-400"
-          >
-            {t('settings.addFirstPlayer')}
-          </Link>
-        )}
+        <AnimatePresence>
+          {showNewPlayerForm && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="mt-2 overflow-hidden"
+            >
+              <div className="rounded-xl border border-ft-border bg-ft-card p-3">
+                <input
+                  type="text"
+                  value={npFirstName}
+                  onChange={(e) => setNpFirstName(e.target.value)}
+                  placeholder={t('players.firstNamePlaceholder')}
+                  className="mb-2 w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
+                  autoFocus
+                />
+                <input
+                  type="text"
+                  value={npLastName1}
+                  onChange={(e) => setNpLastName1(e.target.value)}
+                  placeholder={t('players.lastName1Placeholder')}
+                  className="mb-2 w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
+                />
+                <input
+                  type="text"
+                  value={npLastName2}
+                  onChange={(e) => setNpLastName2(e.target.value)}
+                  placeholder={t('players.lastName2Placeholder')}
+                  className="mb-2 w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
+                />
+                <input
+                  type="text"
+                  value={npLicenseNumber}
+                  onChange={(e) => setNpLicenseNumber(e.target.value)}
+                  placeholder={t('players.licenseNumber')}
+                  className="mb-3 w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCreatePlayer}
+                    disabled={!npFirstName.trim()}
+                    className="flex-1 rounded-lg bg-ft-green py-2 text-xs font-bold text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:bg-ft-surface disabled:text-ft-label"
+                  >
+                    {t('players.save')}
+                  </button>
+                  <button
+                    onClick={() => setShowNewPlayerForm(false)}
+                    className="rounded-lg border border-ft-border px-4 py-2 text-xs font-medium text-ft-muted transition-all active:scale-95"
+                  >
+                    {t('players.cancel')}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {format === 'parejas' && selectedPlayerIds.length > 0 && selectedPlayerIds.length !== 2 && selectedPlayerIds.length !== 4 && (
-          <p className="mt-1 text-[10px] text-amber-500">
+          <p className="mt-1 text-[10px] text-ft-amber">
             {t('newRound.addSecondPlayer')}
           </p>
         )}
@@ -276,7 +348,7 @@ export default function NewRoundForm() {
 
       {/* Course */}
       <div>
-        <label className="mb-1 block text-sm font-medium text-zinc-500">
+        <label className="mb-1 block text-sm font-medium text-ft-muted">
           {t('newRound.courseName')}
         </label>
 
@@ -285,45 +357,57 @@ export default function NewRoundForm() {
             setShowCoursePicker(!showCoursePicker);
             if (!showCoursePicker) setCourseFilter('');
           }}
-          className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3 text-left text-lg dark:border-zinc-700 dark:bg-zinc-900"
+          className="relative flex w-full items-center justify-between overflow-hidden rounded-xl border border-ft-border px-4 py-3 text-left text-lg"
         >
+          {selectedCourse?.imageUrl && (
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${selectedCourse.imageUrl})` }}
+            />
+          )}
           <span
             className={
-              courseName ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-300'
+              selectedCourse?.imageUrl ? 'relative text-white' : courseName ? 'text-ft-text' : 'text-ft-label'
             }
           >
             {courseName || t('newRound.selectCourse')}
           </span>
-          <ChevronDown size={18} className="text-zinc-400" />
+          <ChevronDown size={18} className={selectedCourse?.imageUrl ? 'relative text-white/70' : 'text-ft-muted'} />
         </button>
 
         {showCoursePicker && (
-          <div className="mt-2 rounded-xl border border-zinc-200 bg-white p-2 dark:border-zinc-700 dark:bg-zinc-900">
+          <div className="mt-2 rounded-xl border border-ft-border bg-ft-surface p-2 border-ft-border bg-ft-card">
             <input
               type="text"
               value={courseFilter}
               onChange={(e) => setCourseFilter(e.target.value)}
               placeholder={t('newRound.selectCourse')}
-              className="mb-2 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800"
+              className="mb-2 w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20 border-ft-border bg-ft-surface"
               autoFocus
             />
             {filteredCourses.map((course) => (
               <button
                 key={course.id}
                 onClick={() => handleSelectCourse(course)}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
+                className={`relative flex w-full items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
                   selectedCourseId === course.id
-                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
-                    : 'hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                    ? 'bg-ft-green/10 text-ft-green-bright'
+                    : 'hover:bg-ft-surface'
                 }`}
               >
+                {course.imageUrl && (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center opacity-30"
+                    style={{ backgroundImage: `url(${course.imageUrl})` }}
+                  />
+                )}
                 <MapPin
                   size={16}
-                  className="shrink-0 text-zinc-400"
+                  className="relative shrink-0 text-ft-muted"
                 />
-                <div>
+                <div className="relative">
                   <p className="font-medium">{course.name}</p>
-                  <p className="text-[11px] text-zinc-400">
+                  <p className="text-[11px] text-ft-muted">
                     {course.tees.length} {t('courses.tees')} ·{' '}
                     {course.tees[0]?.totalHoles || 18} {t('home.holes')}
                   </p>
@@ -334,11 +418,11 @@ export default function NewRoundForm() {
               onClick={handleUseCustomCourse}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
                 !selectedCourseId && !customCourseName
-                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50'
-                  : 'hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                  ? 'bg-ft-green/10 text-ft-green-bright bg-ft-green/10'
+                  : 'hover:bg-ft-surface hover:bg-ft-surface'
               }`}
             >
-              <Plus size={16} className="shrink-0 text-zinc-400" />
+              <Plus size={16} className="shrink-0 text-ft-muted" />
               <span className="font-medium">
                 {t('newRound.quickRound')}
               </span>
@@ -352,14 +436,14 @@ export default function NewRoundForm() {
             value={customCourseName}
             onChange={(e) => setCustomCourseName(e.target.value)}
             placeholder={t('newRound.coursePlaceholder')}
-            className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600 dark:focus:border-emerald-500 dark:focus:ring-emerald-900"
+            className="mt-2 w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-lg placeholder-ft-muted focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20 border-ft-border bg-ft-card"
           />
         )}
 
         {!selectedCourseId && (
           <Link
             href="/courses"
-            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400"
+            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-ft-green-bright text-ft-green-bright"
           >
             <Plus size={14} />
             {t('newRound.saveCourse')}
@@ -369,7 +453,7 @@ export default function NewRoundForm() {
 
       {selectedCourseId && (
         <div>
-          <label className="mb-1 block text-sm font-medium text-zinc-500">
+          <label className="mb-1 block text-sm font-medium text-ft-muted">
             {t('newRound.teeColor')}
           </label>
           <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
@@ -379,8 +463,8 @@ export default function NewRoundForm() {
                 onClick={() => handleSelectTee(tee)}
                 className={`rounded-lg py-2 text-xs font-medium transition-all active:scale-95 ${
                   selectedTee === tee.name
-                    ? 'bg-emerald-500 text-white shadow-sm'
-                    : 'border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900'
+                    ? 'bg-ft-green text-white shadow-sm'
+                    : 'border border-ft-border bg-ft-surface text-ft-muted border-ft-border bg-ft-card'
                 }`}
               >
                 <span className="block">{tee.name}</span>
@@ -391,7 +475,7 @@ export default function NewRoundForm() {
             ))}
           </div>
           {activeTeeObj && (
-            <p className="mt-1 text-xs text-zinc-400">
+            <p className="mt-1 text-xs text-ft-muted">
               {t('newRound.totalPar', { par: activeTeeObj.pars.reduce((a, b) => a + b, 0) })}
               {' · '}
               {t('newRound.courseRating')}: {activeTeeObj.rating} /{' '}
@@ -404,7 +488,7 @@ export default function NewRoundForm() {
       {!selectedCourseId && (
         <>
           <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-500">
+            <label className="mb-1 block text-sm font-medium text-ft-muted">
               {t('newRound.numHoles')}
             </label>
             <div className="flex gap-2">
@@ -412,8 +496,8 @@ export default function NewRoundForm() {
                 onClick={() => handleHoleCountChange(9)}
                 className={`flex-1 rounded-xl py-3 text-base font-bold transition-all active:scale-95 ${
                   totalHoles === 9
-                    ? 'bg-emerald-500 text-white shadow-sm'
-                    : 'border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900'
+                    ? 'bg-ft-green text-white shadow-sm'
+                    : 'border border-ft-border bg-ft-surface text-ft-muted border-ft-border bg-ft-card'
                 }`}
               >
                 {t('newRound.holes9')}
@@ -422,8 +506,8 @@ export default function NewRoundForm() {
                 onClick={() => handleHoleCountChange(18)}
                 className={`flex-1 rounded-xl py-3 text-base font-bold transition-all active:scale-95 ${
                   totalHoles === 18
-                    ? 'bg-emerald-500 text-white shadow-sm'
-                    : 'border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900'
+                    ? 'bg-ft-green text-white shadow-sm'
+                    : 'border border-ft-border bg-ft-surface text-ft-muted border-ft-border bg-ft-card'
                 }`}
               >
                 {t('newRound.holes18')}
@@ -435,7 +519,7 @@ export default function NewRoundForm() {
             <div>
               <button
                 onClick={() => setCustomPars(true)}
-                className="text-sm font-medium text-emerald-600 dark:text-emerald-400"
+                className="text-sm font-medium text-ft-green-bright text-ft-green-bright"
               >
                 {t('newRound.customizePars')}
               </button>
@@ -451,13 +535,13 @@ export default function NewRoundForm() {
                 className="overflow-hidden"
               >
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-zinc-500">
+                  <label className="mb-1 block text-sm font-medium text-ft-muted">
                     {t('newRound.parPerHole')}
                   </label>
                   <div className="grid grid-cols-9 gap-1">
                     {parInputs.map((par, i) => (
                       <div key={i} className="text-center">
-                        <p className="text-[10px] text-zinc-400">#{i + 1}</p>
+                        <p className="text-[10px] text-ft-muted">#{i + 1}</p>
                         <input
                           type="number"
                           min={3}
@@ -466,18 +550,18 @@ export default function NewRoundForm() {
                           onChange={(e) =>
                             handleParChange(i, parseInt(e.target.value))
                           }
-                          className="w-full rounded border border-zinc-200 bg-zinc-50 py-1 text-center text-sm dark:border-zinc-700 dark:bg-zinc-800"
+                          className="w-full rounded border border-ft-border bg-ft-surface py-1 text-center text-sm border-ft-border bg-ft-surface"
                         />
                       </div>
                     ))}
                   </div>
                   <div className="mt-1 flex items-center justify-between">
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-ft-muted">
                       {t('newRound.totalPar', { par: totalPar })}
                     </p>
                     <button
                       onClick={() => setCustomPars(false)}
-                      className="text-xs font-medium text-emerald-600 dark:text-emerald-400"
+                      className="text-xs font-medium text-ft-green-bright text-ft-green-bright"
                     >
                       {t('newRound.useDefaultPars')}
                     </button>
@@ -494,8 +578,8 @@ export default function NewRoundForm() {
         disabled={!canStart}
         className={`flex w-full items-center justify-center gap-2 rounded-xl py-4 text-lg font-bold transition-all active:scale-[0.98] ${
           canStart
-            ? 'bg-emerald-500 text-white shadow-sm hover:bg-emerald-600'
-            : 'cursor-not-allowed bg-zinc-100 text-zinc-300 dark:bg-zinc-800'
+            ? 'bg-ft-green text-white shadow-sm hover:bg-ft-green/90'
+            : 'cursor-not-allowed bg-ft-surface text-ft-label bg-ft-surface'
         }`}
       >
         {t('newRound.startRound')}

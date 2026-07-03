@@ -34,7 +34,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
             value={ps.stablefordTotal}
             sublabel={t('scorecard.points')}
             icon={Trophy}
-            color={ps.stablefordTotal >= 36 ? 'emerald' : 'amber'}
+            iconColor={ps.stablefordTotal >= 36 ? 'text-ft-green-bright' : 'text-ft-amber'}
           />
         ) : gameMode === 'match-play' && stats.matchPlayResult ? (
           <StatsCard
@@ -42,7 +42,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
             value={stats.matchPlayResult.upDown}
             sublabel={`${stats.matchPlayResult.playerAWon}-${stats.matchPlayResult.playerBWon}`}
             icon={Trophy}
-            color="emerald"
+            iconColor="text-ft-green-bright"
           />
         ) : (
           <StatsCard
@@ -50,7 +50,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
             value={ps.totalScore}
             sublabel={`${ps.scoreToPar > 0 ? '+' : ''}${ps.scoreToPar}`}
             icon={Target}
-            color={ps.scoreToPar <= 0 ? 'emerald' : 'rose'}
+            iconColor={ps.scoreToPar <= 0 ? 'text-ft-green-bright' : 'text-ft-rose'}
           />
         )}
         <StatsCard
@@ -58,7 +58,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
           value={ps.totalPutts}
           sublabel={`${ps.avgPutts} ${t('statSummary.avg')}`}
           icon={CircleDot}
-          color="blue"
+          iconColor="text-ft-blue"
         />
       </div>
 
@@ -68,21 +68,21 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
           value={`${ps.fairwaysPercentage}%`}
           sublabel={`${ps.fairwaysHit}/${ps.fairwaysTotal}`}
           icon={MapPin}
-          color="amber"
+          iconColor="text-ft-amber"
         />
         <StatsCard
           label={t('statSummary.gir')}
           value={`${ps.girPercentage}%`}
           sublabel={`${ps.gir}/${ps.girTotal}`}
           icon={Flag}
-          color="emerald"
+          iconColor="text-ft-green-bright"
         />
         <StatsCard
           label={t('statSummary.scrambling')}
           value={`${ps.scramblingPercentage}%`}
           sublabel={`${ps.scrambling}/${ps.scramblingTotal}`}
           icon={Navigation}
-          color="violet"
+          iconColor="text-ft-violet"
         />
       </div>
 
@@ -92,39 +92,39 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
           value={`${ps.sandSavePercentage}%`}
           sublabel={`${ps.sandSaves}/${ps.sandSavesTotal}`}
           icon={Droplets}
-          color="cyan"
+          iconColor="text-ft-blue"
         />
         <StatsCard
           label={t('statSummary.penalties')}
           value={ps.totalPenalties}
           icon={CircleDot}
-          color="rose"
+          iconColor="text-ft-rose"
         />
       </div>
 
       <div>
-        <p className="mb-1 text-[10px] font-medium uppercase tracking-wider text-zinc-400">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-ft-label">
           {t('dashboard.puttsByDistance')}
         </p>
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           {(Object.entries(ps.puttsByDistance) as Array<[string, number]>).map(
             ([key, count]) => (
               <div
                 key={key}
                 className="flex items-center gap-2 text-xs"
               >
-                <span className="w-6 text-right font-medium text-zinc-500">
+                <span className="font-mono w-6 text-right font-medium text-ft-label">
                   {key}
                 </span>
-                <div className="h-3 flex-1 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                <div className="h-3 flex-1 overflow-hidden rounded-full bg-ft-surface">
                   <div
-                    className="h-full rounded-full bg-violet-400"
+                    className="h-full rounded-full bg-ft-green-bright/60"
                     style={{
                       width: `${(count / Math.max(...Object.values(ps.puttsByDistance), 1)) * 100}%`,
                     }}
                   />
                 </div>
-                <span className="w-4 text-right font-bold tabular-nums text-zinc-600">
+                <span className="font-mono w-4 text-right font-bold text-ft-muted">
                   {count}
                 </span>
               </div>

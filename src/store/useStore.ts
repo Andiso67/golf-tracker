@@ -71,7 +71,7 @@ interface GolfStore {
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
 
-  addCourse: (name: string, tees: CourseTee[]) => string;
+  addCourse: (name: string, tees: CourseTee[], imageUrl?: string) => string;
   updateCourse: (id: string, data: Partial<SavedCourse>) => void;
   deleteCourse: (id: string) => void;
   getCourse: (id: string) => SavedCourse | undefined;
@@ -414,11 +414,12 @@ export const useStore = create<GolfStore>()(
         }
       },
 
-      addCourse: (name, tees) => {
+      addCourse: (name, tees, imageUrl) => {
         const id = generateId();
         const course: SavedCourse = {
           id,
           name,
+          imageUrl: imageUrl || '',
           tees,
           createdAt: new Date().toISOString(),
         };
@@ -427,7 +428,7 @@ export const useStore = create<GolfStore>()(
         fetch('/api/courses', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, tees }),
+          body: JSON.stringify({ name, tees, imageUrl: imageUrl || '' }),
         }).then(async (res) => {
           if (res.ok) {
             const apiCourse = await res.json()
@@ -484,6 +485,7 @@ export const useStore = create<GolfStore>()(
             const course: SavedCourse = {
               id: `rfeg_${item.id}`,
               name,
+              imageUrl: '',
               tees,
               createdAt: new Date().toISOString(),
             };
