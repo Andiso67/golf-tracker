@@ -167,25 +167,25 @@ export default function DashboardPage() {
                   label={t('dashboard.avgScore')}
                   value={avgStats.avgScore}
                   icon={Target}
-                  color="emerald"
+                  iconColor="text-ft-green-bright"
                 />
                 <StatsCard
                   label={t('dashboard.avgGir')}
                   value={`${avgStats.avgGIR}%`}
                   icon={Flag}
-                  color="blue"
+                  iconColor="text-ft-blue"
                 />
                 <StatsCard
                   label={t('dashboard.avgPutts')}
                   value={avgStats.avgPutts}
                   icon={CircleDot}
-                  color="violet"
+                  iconColor="text-ft-violet"
                 />
                 <StatsCard
                   label={t('dashboard.avgFairways')}
                   value={`${avgStats.avgFairways}%`}
                   icon={TrendingUp}
-                  color="amber"
+                  iconColor="text-ft-amber"
                 />
               </div>
             )}
