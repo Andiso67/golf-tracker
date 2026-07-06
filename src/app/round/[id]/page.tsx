@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
+  BarChart3,
   Bell,
   CheckCircle2,
   Minus,
@@ -67,6 +68,14 @@ function RoundContent({ roundId }: { roundId: string }) {
   const [editingCourse, setEditingCourse] = useState(false);
   const [courseInput, setCourseInput] = useState('');
   const [saved, setSaved] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    setIsDesktop(window.innerWidth >= 1024);
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (!round) {
     return (
@@ -97,6 +106,9 @@ function RoundContent({ roundId }: { roundId: string }) {
   const [strokes, setStrokes] = useState(0);
   const [putts, setPutts] = useState(0);
   const [fairwayOption, setFairwayOption] = useState<FairwayOption>(null);
+  const [bunker, setBunker] = useState(0);
+  const [approach, setApproach] = useState(0);
+  const [puttDistance, setPuttDistance] = useState<HoleData['puttDistance']>(null);
 
   const handleHoleChange = useCallback((hole: HoleData) => {
     setStrokes(hole.score > 0 ? hole.score : hole.par);
@@ -105,6 +117,9 @@ function RoundContent({ roundId }: { roundId: string }) {
     else if (hole.fairwayHit === 'Left' || hole.fairwayHit === 'Right') setFairwayOption(hole.fairwayHit);
     else if (hole.fairwayHit === 'No') setFairwayOption('Miss');
     else setFairwayOption(null);
+    setBunker(hole.sandSave || 0);
+    setApproach(hole.approach || 0);
+    setPuttDistance(hole.puttDistance || null);
   }, []);
 
   useEffect(() => {
@@ -122,6 +137,9 @@ function RoundContent({ roundId }: { roundId: string }) {
       putts,
       fairwayHit: mappedFairway,
       gir: strokes > 0 && strokes <= currentHole.par && putts <= 2,
+      sandSave: bunker,
+      approach: approach,
+      puttDistance: puttDistance,
     };
     updateHole(roundId, currentHole.number, data, activePlayerIndex);
     if (!teamMode) {
@@ -209,9 +227,9 @@ function RoundContent({ roundId }: { roundId: string }) {
       : 'text-ft-rose';
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col bg-ft-background">
+    <div className="mx-auto flex w-full max-w-lg lg:max-w-5xl xl:max-w-6xl flex-1 flex-col bg-ft-background">
       {/* TopAppBar */}
-      <div className="sticky top-0 z-20 bg-ft-background px-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-2">
+      <div className="sticky top-0 z-20 bg-ft-background px-4 lg:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-2">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <span className="text-sm font-bold tracking-wider text-ft-text">PROGOLF</span>
@@ -231,7 +249,7 @@ function RoundContent({ roundId }: { roundId: string }) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-24">
+      <div className="flex-1 overflow-y-auto px-4 lg:px-6 pb-24">
         {/* Course info row */}
         <div className="mb-2 flex items-center gap-1.5 text-[11px] text-ft-muted">
           {editingCourse ? (
@@ -297,206 +315,282 @@ function RoundContent({ roundId }: { roundId: string }) {
           </div>
         )}
 
-        {/* ScorecardTable */}
-        <ScorecardTable
-          holes={currentPlayer?.holes || []}
-          compact
-          gameMode={round.gameMode}
-        />
+        {/* Desktop: two-column layout */}
+        <div className="lg:grid lg:grid-cols-5 lg:gap-6 lg:items-start">
 
-        {/* Hole detail */}
-        {currentHole && (
-          <>
-            <div className="mt-4 rounded-xl border border-ft-border bg-ft-card p-4">
-              <p className="mb-3 text-sm font-semibold text-ft-text">
-                {t('scorecard.holeContext', { course: round.courseName, number: currentHole.number })}
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-ft-label">PAR</span>
-                  <span className="font-mono text-2xl font-bold text-ft-text">{currentHole.par}</span>
-                </div>
-                {currentHole.handicap != null && (
-                  <div className="flex items-center gap-1.5">
-                    <TrendingUp size={16} className="text-ft-muted" />
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-ft-label">
-                      {t('scorecard.hcp', { index: currentHole.handicap })}
-                    </span>
-                  </div>
-                )}
-                <div className="ml-auto">
-                  <span className="rounded-md border border-ft-border bg-ft-surface px-2 py-0.5 text-[10px] font-medium text-ft-label">
-                    {playedHoles}/{round.totalHoles} {t('home.holes')}
-                  </span>
-                </div>
-              </div>
-            </div>
+          {/* Left column: ScorecardTable */}
+          <div className="lg:col-span-3 lg:min-w-0">
+            <ScorecardTable
+              holes={currentPlayer?.holes || []}
+              compact={!isDesktop}
+              gameMode={round.gameMode}
+            />
+          </div>
 
-            <div className="mt-3 rounded-xl border border-ft-border bg-ft-card p-4">
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-ft-label">
-                {t('scorecard.strokes')}
-              </p>
-              <div className="flex items-center justify-center gap-6">
-                {round.completed ? (
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Minus size={22} /></span>
-                ) : (
-                  <button onClick={() => setStrokes(Math.max(1, strokes - 1))} className="flex h-12 w-12 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Minus size={22} /></button>
-                )}
-                <span className="font-mono min-w-[3ch] text-center text-4xl font-bold text-ft-text">{strokes}</span>
-                {round.completed ? (
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Plus size={22} /></span>
-                ) : (
-                  <button onClick={() => setStrokes(strokes + 1)} className="flex h-12 w-12 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Plus size={22} /></button>
-                )}
-              </div>
-            </div>
+          {/* Right column: hole input + stats */}
+          <div className="lg:col-span-2 lg:sticky lg:top-4 lg:space-y-3">
 
-            <div className="mt-3 rounded-xl border border-ft-border bg-ft-card p-4">
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-ft-label">{t('scorecard.putts')}</p>
-              <div className="flex items-center justify-center gap-6">
-                {round.completed ? (
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Minus size={22} /></span>
-                ) : (
-                  <button onClick={() => setPutts(Math.max(0, putts - 1))} className="flex h-12 w-12 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Minus size={22} /></button>
-                )}
-                <span className="font-mono min-w-[3ch] text-center text-4xl font-bold text-ft-text">{putts}</span>
-                {round.completed ? (
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Plus size={22} /></span>
-                ) : (
-                  <button onClick={() => setPutts(putts + 1)} className="flex h-12 w-12 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Plus size={22} /></button>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-3 rounded-xl border border-ft-border bg-ft-card p-4">
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-ft-label">{t('scorecard.fairwayAccuracy')}</p>
-              <div className="grid grid-cols-4 gap-2">
-                {(['Left', 'Center', 'Right'] as const).map((opt) => {
-                  const isActive = fairwayOption === opt;
-                  return round.completed ? (
-                    <div key={opt} className={`flex flex-col items-center gap-1.5 rounded-xl py-3 text-xs font-semibold ${isActive ? (opt === 'Center' ? 'bg-ft-green text-white shadow-sm' : 'bg-ft-amber text-white shadow-sm') : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
-                      {opt === 'Left' && <ArrowLeft size={20} />}
-                      {opt === 'Center' && <TrendingUp size={20} />}
-                      {opt === 'Right' && <ArrowLeft size={20} className="rotate-180" />}
-                      {t(`scorecard.${opt.toLowerCase()}`)}
+            {currentHole && (
+              <>
+                <div className="rounded-xl border border-ft-border bg-ft-card p-4">
+                  <p className="mb-3 text-sm font-semibold text-ft-text">
+                    {t('scorecard.holeContext', { course: round.courseName, number: currentHole.number })}
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-ft-label">PAR</span>
+                      <span className="font-mono text-2xl font-bold text-ft-text">{currentHole.par}</span>
                     </div>
-                  ) : (
-                    <button key={opt} onClick={() => setFairwayOption(isActive ? null : opt)} className={`flex flex-col items-center gap-1.5 rounded-xl py-3 text-xs font-semibold transition-all active:scale-95 ${isActive ? (opt === 'Center' ? 'bg-ft-green text-white shadow-sm' : 'bg-ft-amber text-white shadow-sm') : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
-                      {opt === 'Left' && <ArrowLeft size={20} />}
-                      {opt === 'Center' && <TrendingUp size={20} />}
-                      {opt === 'Right' && <ArrowLeft size={20} className="rotate-180" />}
-                      {t(`scorecard.${opt.toLowerCase()}`)}
-                    </button>
-                  );
-                })}
-                {round.completed ? (
-                  <div className={`flex flex-col items-center gap-1.5 rounded-xl py-3 text-xs font-semibold ${fairwayOption === 'Miss' ? 'border border-ft-rose/50 bg-ft-rose/10 text-ft-rose' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
-                    <X size={20} />
-                    {t('scorecard.miss')}
+                    {currentHole.handicap != null && (
+                      <div className="flex items-center gap-1.5">
+                        <TrendingUp size={16} className="text-ft-muted" />
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-ft-label">
+                          {t('scorecard.hcp', { index: currentHole.handicap })}
+                        </span>
+                      </div>
+                    )}
+                    <div className="ml-auto">
+                      <span className="rounded-md border border-ft-border bg-ft-surface px-2 py-0.5 text-[10px] font-medium text-ft-label">
+                        {playedHoles}/{round.totalHoles} {t('home.holes')}
+                      </span>
+                    </div>
                   </div>
-                ) : (
-                  <button onClick={() => setFairwayOption(fairwayOption === 'Miss' ? null : 'Miss')} className={`flex flex-col items-center gap-1.5 rounded-xl py-3 text-xs font-semibold transition-all active:scale-95 ${fairwayOption === 'Miss' ? 'border border-ft-rose/50 bg-ft-rose/10 text-ft-rose' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
-                    <X size={20} />
-                    {t('scorecard.miss')}
-                  </button>
-                )}
-              </div>
-            </div>
+                </div>
 
-            {!round.completed && (
-              <AnimatePresence>
-                {saved && (
-                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-2 flex items-center justify-center gap-1 text-xs font-medium text-ft-green-bright">
-                    <CheckCircle2 size={14} />
-                    Saved
-                  </motion.div>
+                <div className="rounded-xl border border-ft-border bg-ft-card p-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ft-label">{t('scorecard.strokes')}</p>
+                      <div className="flex items-center justify-center gap-3">
+                        {round.completed ? (
+                          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Minus size={18} /></span>
+                        ) : (
+                          <button onClick={() => setStrokes(Math.max(1, strokes - 1))} className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Minus size={18} /></button>
+                        )}
+                        <span className="font-mono min-w-[2.5ch] text-center text-3xl font-bold text-ft-text">{strokes}</span>
+                        {round.completed ? (
+                          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Plus size={18} /></span>
+                        ) : (
+                          <button onClick={() => setStrokes(strokes + 1)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Plus size={18} /></button>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ft-label">{t('scorecard.putts')}</p>
+                      <div className="flex items-center justify-center gap-3">
+                        {round.completed ? (
+                          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Minus size={18} /></span>
+                        ) : (
+                          <button onClick={() => setPutts(Math.max(0, putts - 1))} className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Minus size={18} /></button>
+                        )}
+                        <span className="font-mono min-w-[2.5ch] text-center text-3xl font-bold text-ft-text">{putts}</span>
+                        {round.completed ? (
+                          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Plus size={18} /></span>
+                        ) : (
+                          <button onClick={() => setPutts(putts + 1)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Plus size={18} /></button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-ft-border bg-ft-card p-4">
+                  <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-ft-label">{t('scorecard.fairwayAccuracy')}</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {(['Left', 'Center', 'Right'] as const).map((opt) => {
+                      const isActive = fairwayOption === opt;
+                      return round.completed ? (
+                        <div key={opt} className={`flex flex-col items-center gap-1 rounded-xl py-2.5 text-xs font-semibold ${isActive ? (opt === 'Center' ? 'bg-ft-green text-white shadow-sm' : 'bg-ft-amber text-white shadow-sm') : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
+                          {opt === 'Left' && <ArrowLeft size={18} />}
+                          {opt === 'Center' && <TrendingUp size={18} />}
+                          {opt === 'Right' && <ArrowLeft size={18} className="rotate-180" />}
+                          {t(`scorecard.${opt.toLowerCase()}`)}
+                        </div>
+                      ) : (
+                        <button key={opt} onClick={() => setFairwayOption(isActive ? null : opt)} className={`flex flex-col items-center gap-1 rounded-xl py-2.5 text-xs font-semibold transition-all active:scale-95 ${isActive ? (opt === 'Center' ? 'bg-ft-green text-white shadow-sm' : 'bg-ft-amber text-white shadow-sm') : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
+                          {opt === 'Left' && <ArrowLeft size={18} />}
+                          {opt === 'Center' && <TrendingUp size={18} />}
+                          {opt === 'Right' && <ArrowLeft size={18} className="rotate-180" />}
+                          {t(`scorecard.${opt.toLowerCase()}`)}
+                        </button>
+                      );
+                    })}
+                    {round.completed ? (
+                      <div className={`flex flex-col items-center gap-1 rounded-xl py-2.5 text-xs font-semibold ${fairwayOption === 'Miss' ? 'border border-ft-rose/50 bg-ft-rose/10 text-ft-rose' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
+                        <X size={18} />
+                        {t('scorecard.miss')}
+                      </div>
+                    ) : (
+                      <button onClick={() => setFairwayOption(fairwayOption === 'Miss' ? null : 'Miss')} className={`flex flex-col items-center gap-1 rounded-xl py-2.5 text-xs font-semibold transition-all active:scale-95 ${fairwayOption === 'Miss' ? 'border border-ft-rose/50 bg-ft-rose/10 text-ft-rose' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
+                        <X size={18} />
+                        {t('scorecard.miss')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-ft-border bg-ft-card p-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ft-label">{t('scorecard.bunker')}</p>
+                      <div className="flex items-center justify-center gap-3">
+                        {round.completed ? (
+                          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Minus size={18} /></span>
+                        ) : (
+                          <button onClick={() => setBunker(Math.max(0, bunker - 1))} className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Minus size={18} /></button>
+                        )}
+                        <span className="font-mono min-w-[2.5ch] text-center text-3xl font-bold text-ft-text">{bunker}</span>
+                        {round.completed ? (
+                          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Plus size={18} /></span>
+                        ) : (
+                          <button onClick={() => setBunker(bunker + 1)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Plus size={18} /></button>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ft-label">{t('scorecard.approach')}</p>
+                      <div className="flex items-center justify-center gap-3">
+                        {round.completed ? (
+                          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Minus size={18} /></span>
+                        ) : (
+                          <button onClick={() => setApproach(Math.max(0, approach - 1))} className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Minus size={18} /></button>
+                        )}
+                        <span className="font-mono min-w-[2.5ch] text-center text-3xl font-bold text-ft-text">{approach}</span>
+                        {round.completed ? (
+                          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text opacity-50"><Plus size={18} /></span>
+                        ) : (
+                          <button onClick={() => setApproach(approach + 1)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90"><Plus size={18} /></button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-ft-border bg-ft-card p-4">
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ft-label">{t('scorecard.puttDistance')}</p>
+                  <div className="grid grid-cols-5 gap-2">
+                    {(['<1', '1-2', '2-4', '4-8', '+8'] as const).map((d) => {
+                      const active = puttDistance === d;
+                      return round.completed ? (
+                        <div key={d} className={`rounded-xl py-2.5 text-center text-xs font-semibold ${active ? 'bg-ft-green text-white shadow-sm' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
+                          {t(`scorecard.puttDistances.${d}`)}
+                        </div>
+                      ) : (
+                        <button key={d} onClick={() => setPuttDistance(active ? null : d)} className={`rounded-xl py-2.5 text-center text-xs font-semibold transition-all active:scale-95 ${active ? 'bg-ft-green text-white shadow-sm' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
+                          {t(`scorecard.puttDistances.${d}`)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {!round.completed && (
+                  <AnimatePresence>
+                    {saved && (
+                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center justify-center gap-1 text-xs font-medium text-ft-green-bright">
+                        <CheckCircle2 size={14} />
+                        Saved
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 )}
-              </AnimatePresence>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <button onClick={() => { if (!round.completed) handleSaveHole(); if (activeHoleIndex > 0) prevHole(); }} disabled={activeHoleIndex === 0} className="flex items-center justify-center gap-2 rounded-xl border border-ft-border bg-ft-surface py-3.5 text-xs font-bold text-ft-text transition-all active:scale-[0.98] disabled:opacity-30">
+                    <ArrowLeft size={16} />
+                    {t('scorecard.prevHole')}
+                  </button>
+                  <button onClick={() => { if (round.completed) { if (activeHoleIndex < (currentPlayer?.holes.length || 1) - 1) nextHole(); } else { if (activeHoleIndex < (currentPlayer?.holes.length || 1) - 1 || activePlayerIndex < round.players.length - 1) { handleSaveAndNext(); } else { handleSaveHole(); } } }} disabled={activeHoleIndex === (currentPlayer?.holes.length || 1) - 1} className="flex items-center justify-center gap-2 rounded-xl bg-ft-green py-3.5 text-xs font-bold text-white shadow-sm transition-all active:scale-[0.98] disabled:opacity-50">
+                    {t('scorecard.nextHole')}
+                    <ArrowLeft size={16} className="rotate-180" />
+                  </button>
+                </div>
+              </>
             )}
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <button onClick={() => { if (!round.completed) handleSaveHole(); if (activeHoleIndex > 0) prevHole(); }} disabled={activeHoleIndex === 0} className="flex items-center justify-center gap-2 rounded-xl border border-ft-border bg-ft-surface py-3.5 text-xs font-bold text-ft-text transition-all active:scale-[0.98] disabled:opacity-30">
-                <ArrowLeft size={16} />
-                {t('scorecard.prevHole')}
-              </button>
-              <button onClick={() => { if (round.completed) { if (activeHoleIndex < (currentPlayer?.holes.length || 1) - 1) nextHole(); } else { if (activeHoleIndex < (currentPlayer?.holes.length || 1) - 1 || activePlayerIndex < round.players.length - 1) { handleSaveAndNext(); } else { handleSaveHole(); } } }} disabled={activeHoleIndex === (currentPlayer?.holes.length || 1) - 1} className="flex items-center justify-center gap-2 rounded-xl bg-ft-green py-3.5 text-xs font-bold text-white shadow-sm transition-all active:scale-[0.98] disabled:opacity-50">
-                {t('scorecard.nextHole')}
-                <ArrowLeft size={16} className="rotate-180" />
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* Stats toggle */}
-        <button
-          onClick={() => setShowStats(!showStats)}
-          className="mt-4 text-sm font-medium text-ft-green-bright"
-        >
-          {showStats ? t('round.hideStats') : t('round.showStats')}
-        </button>
-
-        <AnimatePresence>
-          {showStats && stats && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="mt-2 overflow-hidden"
-            >
-              <StatSummary stats={stats} gameMode={round.gameMode} activePlayerIndex={activePlayerIndex} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Complete Round */}
-        {allPlayed && !round.completed && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-4"
-          >
+            {/* Stats */}
             <button
-              onClick={handleComplete}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-ft-green py-4 text-lg font-bold text-white shadow-sm transition-all active:scale-[0.98]"
+              onClick={() => setShowStats(!showStats)}
+              className="flex w-full items-center gap-3 rounded-xl border border-ft-border bg-ft-card p-3 text-left transition-all active:scale-[0.98]"
             >
-              <CheckCircle2 size={22} />
-              {t('round.completeRound')}
+              <div className="shrink-0 text-ft-violet">
+                <BarChart3 size={24} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-ft-label">{t('scorecard.stats')}</p>
+                {stats ? (
+                  <p className="text-lg font-bold leading-tight tracking-tight text-ft-text">
+                    {displayScore}
+                  </p>
+                ) : (
+                  <p className="text-sm font-medium text-ft-green-bright">{t('round.showStats')}</p>
+                )}
+              </div>
             </button>
-          </motion.div>
-        )}
-        {round.completed && (
-          <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-ft-green/10 py-3 text-sm font-semibold text-ft-green-bright">
-            <CheckCircle2 size={18} />
-            Round completed
+
+            <AnimatePresence>
+              {showStats && stats && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <StatSummary stats={stats} gameMode={round.gameMode} activePlayerIndex={activePlayerIndex} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Complete Round */}
+            {allPlayed && !round.completed && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <button
+                  onClick={handleComplete}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-ft-green py-4 text-lg font-bold text-white shadow-sm transition-all active:scale-[0.98]"
+                >
+                  <CheckCircle2 size={22} />
+                  {t('round.completeRound')}
+                </button>
+              </motion.div>
+            )}
+            {round.completed && (
+              <div className="flex items-center justify-center gap-2 rounded-xl bg-ft-green/10 py-3 text-sm font-semibold text-ft-green-bright">
+                <CheckCircle2 size={18} />
+                Round completed
+              </div>
+            )}
+
+            {/* Delete */}
+            <div>
+              {deleteConfirm ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setDeleteConfirm(false)}
+                    className="flex-1 rounded-xl border border-ft-border py-3 text-sm font-medium text-ft-muted transition-all active:scale-[0.98]"
+                  >
+                    {t('players.cancel')}
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex-1 rounded-xl bg-ft-rose py-3 text-sm font-bold text-white shadow-sm transition-all active:scale-[0.98]"
+                  >
+                    {t('round.confirmDelete')}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { mediumTap(); setDeleteConfirm(true) }}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-ft-rose/30 py-3 text-sm font-medium text-ft-rose transition-all active:scale-[0.98]"
+                >
+                  <Trash2 size={18} />
+                  {t('round.delete')}
+                </button>
+              )}
+            </div>
           </div>
-        )}
-
-        {/* Delete */}
-        <div className="mt-3 mb-6">
-          {deleteConfirm ? (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setDeleteConfirm(false)}
-                className="flex-1 rounded-xl border border-ft-border py-3 text-sm font-medium text-ft-muted transition-all active:scale-[0.98]"
-              >
-                {t('players.cancel')}
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 rounded-xl bg-ft-rose py-3 text-sm font-bold text-white shadow-sm transition-all active:scale-[0.98]"
-              >
-                {t('round.confirmDelete')}
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => { mediumTap(); setDeleteConfirm(true) }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-ft-rose/30 py-3 text-sm font-medium text-ft-rose transition-all active:scale-[0.98]"
-            >
-              <Trash2 size={18} />
-              {t('round.delete')}
-            </button>
-          )}
         </div>
       </div>
     </div>

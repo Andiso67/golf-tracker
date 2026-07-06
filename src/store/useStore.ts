@@ -239,6 +239,7 @@ export const useStore = create<GolfStore>()(
               }
             }
           } catch {}
+          await get().syncFromApi()
           return { success: true }
         } catch {
           return { success: false, error: 'Network error' }
@@ -286,6 +287,7 @@ export const useStore = create<GolfStore>()(
               }))
             }
           } catch {}
+          await get().syncFromApi()
           return { success: true }
         } catch {
           return { success: false, error: 'Network error' }
@@ -331,6 +333,7 @@ export const useStore = create<GolfStore>()(
               }
             } catch {}
           }
+          await get().syncFromApi()
         } catch {
           // offline — keep current state
         }
