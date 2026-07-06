@@ -114,7 +114,7 @@ function UserManager({ currentUserId }: { currentUserId: string | null }) {
   if (loading) {
     return (
       <section className="flex items-center justify-center py-8">
-        <Loader2 size={20} className="animate-spin text-zinc-400" />
+        <Loader2 size={20} className="animate-spin text-ft-muted" />
       </section>
     );
   }
@@ -122,20 +122,20 @@ function UserManager({ currentUserId }: { currentUserId: string | null }) {
   return (
     <section>
       <div className="mb-3 flex items-center gap-2">
-        <UserCog size={18} className="text-zinc-400" />
-        <h2 className="text-base font-bold text-zinc-700 dark:text-zinc-300">
+        <UserCog size={18} className="text-ft-muted" />
+        <h2 className="text-base font-bold text-ft-text">
           {t('settings.usersSection')}
         </h2>
       </div>
 
-      <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="rounded-xl border border-ft-border bg-ft-card">
         {users.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-8 text-center">
-            <UserCog size={28} className="text-zinc-300 dark:text-zinc-600" />
-            <p className="text-sm text-zinc-400">{t('users.noUsers')}</p>
+            <UserCog size={28} className="text-ft-muted" />
+            <p className="text-sm text-ft-muted">{t('users.noUsers')}</p>
             <button
               onClick={() => { resetForm(); setShowForm(true); }}
-              className="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white"
+              className="flex items-center gap-1 rounded-lg bg-ft-green px-3 py-1.5 text-xs font-bold text-white"
             >
               <Plus size={14} />
               {t('users.addUser')}
@@ -143,12 +143,12 @@ function UserManager({ currentUserId }: { currentUserId: string | null }) {
           </div>
         ) : (
             <div>
-              <div className="border-b border-zinc-100 px-4 py-2.5 dark:border-zinc-800">
-                <p className="text-xs font-medium text-zinc-400">
+              <div className="border-b border-ft-border px-4 py-2.5">
+                <p className="text-xs font-medium text-ft-muted">
                   {t('users.userCount', { count: users.length })}
                 </p>
               </div>
-            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            <div className="divide-y divide-ft-border">
               {users.map((u) => {
                 const isEditing = editingId === u.id && showForm;
                 const isDeleting = deleteConfirmId === u.id;
@@ -156,30 +156,30 @@ function UserManager({ currentUserId }: { currentUserId: string | null }) {
                   <div key={u.id} className="px-4 py-3">
                     {isDeleting ? (
                       <div className="flex flex-col items-center gap-2 py-2 text-center">
-                        <p className="text-sm font-bold text-rose-600">{t('users.deleteConfirm')}</p>
-                        <p className="text-xs text-zinc-400">{t('users.deleteWarning')}</p>
+                        <p className="text-sm font-bold text-ft-rose">{t('users.deleteConfirm')}</p>
+                        <p className="text-xs text-ft-muted">{t('users.deleteWarning')}</p>
                         <div className="flex gap-2">
-                          <button onClick={() => setDeleteConfirmId(null)} className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 dark:border-zinc-700">{t('users.cancel')}</button>
-                          <button onClick={() => handleDelete(u.id)} className="rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-bold text-white">{t('users.delete')}</button>
+                          <button onClick={() => setDeleteConfirmId(null)} className="rounded-lg border border-ft-border px-3 py-1.5 text-xs font-medium text-ft-muted">{t('users.cancel')}</button>
+                          <button onClick={() => handleDelete(u.id)} className="rounded-lg bg-ft-rose px-3 py-1.5 text-xs font-bold text-white">{t('users.delete')}</button>
                         </div>
                       </div>
                     ) : isEditing ? (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <p className="text-xs font-bold text-zinc-500">{t('users.editUser')}</p>
-                          <button onClick={resetForm} className="rounded p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"><X size={14} /></button>
+                          <p className="text-xs font-bold text-ft-muted">{t('users.editUser')}</p>
+                          <button onClick={resetForm} className="rounded p-1 text-ft-muted hover:bg-ft-surface"><X size={14} /></button>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
-                          <input type="text" value={fName} onChange={e => setFName(e.target.value)} placeholder={t('users.firstNamePlaceholder')} className="col-span-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-800" />
-                          <input type="text" value={l1} onChange={e => setL1(e.target.value)} placeholder={t('users.lastName1Placeholder')} className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-800" />
-                          <input type="text" value={l2} onChange={e => setL2(e.target.value)} placeholder={t('users.lastName2Placeholder')} className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-800" />
+                          <input type="text" value={fName} onChange={e => setFName(e.target.value)} placeholder={t('users.firstNamePlaceholder')} className="col-span-2 rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm outline-none focus:border-ft-green" />
+                          <input type="text" value={l1} onChange={e => setL1(e.target.value)} placeholder={t('users.lastName1Placeholder')} className="rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm outline-none focus:border-ft-green" />
+                          <input type="text" value={l2} onChange={e => setL2(e.target.value)} placeholder={t('users.lastName2Placeholder')} className="rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm outline-none focus:border-ft-green" />
                         </div>
-                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t('users.emailPlaceholder')} className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-800" />
-                        <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={t('users.leaveBlank')} className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-800" />
+                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t('users.emailPlaceholder')} className="w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm outline-none focus:border-ft-green" />
+                        <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={t('users.leaveBlank')} className="w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm outline-none focus:border-ft-green" />
                         <button
                           onClick={handleSave}
                           disabled={saving || !fName.trim() || !email.trim()}
-                          className="flex w-full items-center justify-center gap-1 rounded-lg bg-emerald-500 py-2 text-xs font-bold text-white disabled:opacity-50"
+                          className="flex w-full items-center justify-center gap-1 rounded-lg bg-ft-green py-2 text-xs font-bold text-white disabled:opacity-50"
                         >
                           {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                           {t('users.save')}
@@ -187,15 +187,15 @@ function UserManager({ currentUserId }: { currentUserId: string | null }) {
                       </div>
                     ) : (
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-bold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ft-surface text-xs font-bold text-ft-muted">
                           {u.firstName?.charAt(0)?.toUpperCase() || '?'}
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-bold">{u.firstName} {u.lastName1}</p>
-                          <p className="truncate text-xs text-zinc-400">{u.email}</p>
+                          <p className="truncate text-xs text-ft-muted">{u.email}</p>
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
-                          <button onClick={() => startEdit(u)} className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"><Pencil size={14} /></button>
+                          <button onClick={() => startEdit(u)} className="rounded-lg p-1.5 text-ft-muted hover:bg-ft-surface"><Pencil size={14} /></button>
                         </div>
                       </div>
                     )}
@@ -215,21 +215,21 @@ function UserManager({ currentUserId }: { currentUserId: string | null }) {
             exit={{ height: 0, opacity: 0 }}
             className="mt-2 overflow-hidden"
           >
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-xl border border-ft-border bg-ft-card p-4">
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-sm font-bold">{t('users.addUser')}</h3>
-                <button onClick={resetForm} className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"><X size={16} /></button>
+                <button onClick={resetForm} className="rounded-lg p-1 text-ft-muted hover:bg-ft-surface"><X size={16} /></button>
               </div>
               <div className="space-y-2.5">
-                <input type="text" value={fName} onChange={e => setFName(e.target.value)} placeholder={t('users.firstNamePlaceholder')} className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-800" autoFocus />
+                <input type="text" value={fName} onChange={e => setFName(e.target.value)} placeholder={t('users.firstNamePlaceholder')} className="w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm outline-none focus:border-ft-green" autoFocus />
                 <div className="grid grid-cols-2 gap-2.5">
-                  <input type="text" value={l1} onChange={e => setL1(e.target.value)} placeholder={t('users.lastName1Placeholder')} className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-800" />
-                  <input type="text" value={l2} onChange={e => setL2(e.target.value)} placeholder={t('users.lastName2Placeholder')} className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-800" />
+                  <input type="text" value={l1} onChange={e => setL1(e.target.value)} placeholder={t('users.lastName1Placeholder')} className="rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm outline-none focus:border-ft-green" />
+                  <input type="text" value={l2} onChange={e => setL2(e.target.value)} placeholder={t('users.lastName2Placeholder')} className="rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm outline-none focus:border-ft-green" />
                 </div>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t('users.emailPlaceholder')} className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-800" />
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={t('users.passwordPlaceholder')} className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-800" />
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t('users.emailPlaceholder')} className="w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm outline-none focus:border-ft-green" />
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={t('users.passwordPlaceholder')} className="w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm outline-none focus:border-ft-green" />
               </div>
-              <button onClick={handleSave} disabled={saving || !fName.trim() || !email.trim() || !password} className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 py-2.5 text-sm font-bold text-white disabled:opacity-50">
+              <button onClick={handleSave} disabled={saving || !fName.trim() || !email.trim() || !password} className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-ft-green py-2.5 text-sm font-bold text-white disabled:opacity-50">
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                 {t('users.addUser')}
               </button>
@@ -320,28 +320,28 @@ function SettingsContent() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-6"
       >
-        <Link href="/" className="mb-3 inline-flex items-center gap-1 text-sm text-zinc-400">
+        <Link href="/" className="mb-3 inline-flex items-center gap-1 text-sm text-ft-muted">
           <ArrowLeft size={16} />
           Back
         </Link>
         <h1 className="text-2xl font-bold tracking-tight">
           {t('settings.title')}
         </h1>
-        <p className="text-sm text-zinc-500">{t('settings.subtitle')}</p>
+        <p className="text-sm text-ft-muted">{t('settings.subtitle')}</p>
       </motion.div>
 
       <div className="space-y-6">
         {/* Profile Section */}
         <section>
           <div className="mb-3 flex items-center gap-2">
-            <User size={18} className="text-zinc-400" />
-            <h2 className="text-base font-bold text-zinc-700 dark:text-zinc-300">
+            <User size={18} className="text-ft-muted" />
+            <h2 className="text-base font-bold text-ft-text">
               {t('settings.profileSection')}
             </h2>
           </div>
-          <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="space-y-3 rounded-xl border border-ft-border bg-ft-card p-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-500">
+              <label className="mb-1 block text-sm font-medium text-ft-muted">
                 {t('profile.firstName')}
               </label>
               <input
@@ -349,11 +349,11 @@ function SettingsContent() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder={t('profile.firstNamePlaceholder')}
-                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
+                className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-lg placeholder:text-ft-label focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-500">
+              <label className="mb-1 block text-sm font-medium text-ft-muted">
                 {t('profile.lastName1')}
               </label>
               <input
@@ -361,11 +361,11 @@ function SettingsContent() {
                 value={lastName1}
                 onChange={(e) => setLastName1(e.target.value)}
                 placeholder={t('profile.lastName1Placeholder')}
-                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
+                className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-lg placeholder:text-ft-label focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-500">
+              <label className="mb-1 block text-sm font-medium text-ft-muted">
                 {t('profile.lastName2')}
               </label>
               <input
@@ -373,17 +373,17 @@ function SettingsContent() {
                 value={lastName2}
                 onChange={(e) => setLastName2(e.target.value)}
                 placeholder={t('profile.lastName2Placeholder')}
-                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
+                className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-lg placeholder:text-ft-label focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-500">
+              <label className="mb-1 block text-sm font-medium text-ft-muted">
                 {t('profile.homeCourse')}
               </label>
               <select
                 value={homeCourse}
                 onChange={(e) => setHomeCourse(e.target.value)}
-                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900"
+                className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-lg focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
               >
                 <option value="">{t('profile.noCourse')}</option>
                 {courses.map((c) => (
@@ -394,7 +394,7 @@ function SettingsContent() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-zinc-500">
+              <label className="mb-1 block text-sm font-medium text-ft-muted">
                 {t('profile.email')}
               </label>
               <input
@@ -402,12 +402,12 @@ function SettingsContent() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="email@example.com"
-                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
+                className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-lg placeholder:text-ft-label focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
               />
             </div>
             <button
               onClick={handleSaveProfile}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-base font-bold text-white shadow-sm transition-all active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-ft-green py-3 text-base font-bold text-white shadow-sm transition-all active:scale-[0.98]"
             >
               <Save size={18} />
               {saved ? t('profile.saved') : t('profile.save')}
@@ -418,19 +418,19 @@ function SettingsContent() {
         {/* Language Section */}
         <section>
           <div className="mb-3 flex items-center gap-2">
-            <Languages size={18} className="text-zinc-400" />
-            <h2 className="text-base font-bold text-zinc-700 dark:text-zinc-300">
+            <Languages size={18} className="text-ft-muted" />
+            <h2 className="text-base font-bold text-ft-text">
               {t('settings.languageSection')}
             </h2>
           </div>
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="rounded-xl border border-ft-border bg-ft-card p-4">
             <div className="flex gap-2">
               <button
                 onClick={() => setLanguage('en')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-base font-bold transition-all active:scale-95 ${
                   storeLanguage === 'en'
-                    ? 'bg-emerald-500 text-white shadow-sm'
-                    : 'border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900'
+                    ? 'bg-ft-green text-white shadow-sm'
+                    : 'border border-ft-border bg-ft-card text-ft-muted'
                 }`}
               >
                 English
@@ -439,8 +439,8 @@ function SettingsContent() {
                 onClick={() => setLanguage('es')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-base font-bold transition-all active:scale-95 ${
                   storeLanguage === 'es'
-                    ? 'bg-emerald-500 text-white shadow-sm'
-                    : 'border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900'
+                    ? 'bg-ft-green text-white shadow-sm'
+                    : 'border border-ft-border bg-ft-card text-ft-muted'
                 }`}
               >
                 Español
@@ -453,18 +453,18 @@ function SettingsContent() {
         <section>
           <Link
             href="/players"
-            className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+            className="flex items-center justify-between rounded-xl border border-ft-border bg-ft-card p-4 transition-colors hover:bg-ft-surface"
           >
             <div className="flex items-center gap-3">
-              <Users size={18} className="text-zinc-400" />
+              <Users size={18} className="text-ft-muted" />
               <div>
                 <p className="text-sm font-bold">{t('settings.playerSection')}</p>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-ft-muted">
                   {t('settings.managePlayersDesc')}
                 </p>
               </div>
             </div>
-            <ArrowRight size={18} className="text-zinc-400" />
+            <ArrowRight size={18} className="text-ft-muted" />
           </Link>
         </section>
 
@@ -474,22 +474,22 @@ function SettingsContent() {
         {/* Courses Section */}
         <section>
           <div className="mb-3 flex items-center gap-2">
-            <MapPin size={18} className="text-zinc-400" />
-            <h2 className="text-base font-bold text-zinc-700 dark:text-zinc-300">
+            <MapPin size={18} className="text-ft-muted" />
+            <h2 className="text-base font-bold text-ft-text">
               {t('settings.courseSection')}
             </h2>
           </div>
           <Link
             href="/courses"
-            className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+            className="flex items-center justify-between rounded-xl border border-ft-border bg-ft-card p-4 transition-colors hover:bg-ft-surface"
           >
             <div>
               <p className="text-sm font-bold">{t('settings.manageCourses')}</p>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-ft-muted">
                 {t('settings.manageCoursesDesc')}
               </p>
             </div>
-            <ArrowRight size={18} className="text-zinc-400" />
+            <ArrowRight size={18} className="text-ft-muted" />
           </Link>
         </section>
 
@@ -497,26 +497,26 @@ function SettingsContent() {
         {userEmail && (
           <section>
             <div className="mb-3 flex items-center gap-2">
-              <Mail size={18} className="text-zinc-400" />
-              <h2 className="text-base font-bold text-zinc-700 dark:text-zinc-300">
+              <Mail size={18} className="text-ft-muted" />
+              <h2 className="text-base font-bold text-ft-text">
                 Account
               </h2>
             </div>
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-xl border border-ft-border bg-ft-card p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Mail size={16} className="text-zinc-400" />
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                  <Mail size={16} className="text-ft-muted" />
+                  <span className="text-sm text-ft-muted">
                     {userEmail}
                   </span>
                 </div>
                 {userEmailVerified ? (
-                  <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+                  <span className="flex items-center gap-1 text-xs font-medium text-ft-green-bright">
                     <ShieldCheck size={14} />
                     {t('auth.emailVerified')}
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-xs font-medium text-amber-600">
+                  <span className="flex items-center gap-1 text-xs font-medium text-ft-amber">
                     <ShieldAlert size={14} />
                     {t('auth.emailNotVerified')}
                   </span>
@@ -535,7 +535,7 @@ function SettingsContent() {
               router.push('/login');
             }}
             disabled={loggingOut}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-white py-3 text-sm font-bold text-rose-600 transition-all hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900 dark:bg-zinc-900 dark:text-rose-400 dark:hover:bg-rose-950/30"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-ft-rose/30 bg-ft-card py-3 text-sm font-bold text-ft-rose transition-all hover:bg-ft-rose/10 disabled:opacity-50"
           >
             <LogOut size={16} />
             {loggingOut ? t('auth.updating') : t('auth.logout')}
@@ -544,7 +544,7 @@ function SettingsContent() {
 
         {/* App Info */}
         <section className="pb-6 text-center">
-          <div className="flex items-center justify-center gap-1.5 text-xs text-zinc-400">
+          <div className="flex items-center justify-center gap-1.5 text-xs text-ft-muted">
             <SettingsIcon size={12} />
             <span>Golf Tracker v1.0.0</span>
           </div>
@@ -561,7 +561,7 @@ export default function SettingsPage() {
         <Suspense
           fallback={
             <div className="mx-auto flex max-w-lg flex-1 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-ft-green border-t-transparent" />
             </div>
           }
         >

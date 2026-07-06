@@ -82,25 +82,25 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-6"
         >
-          <Link href="/" className="mb-3 inline-flex items-center gap-1 text-sm text-zinc-400">
+          <Link href="/" className="mb-3 inline-flex items-center gap-1 text-sm text-ft-muted">
             <ArrowLeft size={16} />
             Back
           </Link>
           <h1 className="text-2xl font-bold tracking-tight">
             {t('profile.title')}
           </h1>
-          <p className="text-sm text-zinc-500">{t('profile.subtitle')}</p>
+          <p className="text-sm text-ft-muted">{t('profile.subtitle')}</p>
         </motion.div>
 
         <div className="mb-6 flex justify-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
-            <User size={36} className="text-emerald-600 dark:text-emerald-400" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-ft-green/10">
+            <User size={36} className="text-ft-green-bright" />
           </div>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-500">
+            <label className="mb-1 block text-sm font-medium text-ft-muted">
               {t('profile.firstName')}
             </label>
             <input
@@ -108,12 +108,12 @@ export default function ProfilePage() {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder={t('profile.firstNamePlaceholder')}
-              className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
+              className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-lg placeholder:text-ft-label focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-500">
+            <label className="mb-1 block text-sm font-medium text-ft-muted">
               {t('profile.lastName1')}
             </label>
             <input
@@ -121,12 +121,12 @@ export default function ProfilePage() {
               value={lastName1}
               onChange={(e) => setLastName1(e.target.value)}
               placeholder={t('profile.lastName1Placeholder')}
-              className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
+              className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-lg placeholder:text-ft-label focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-500">
+            <label className="mb-1 block text-sm font-medium text-ft-muted">
               {t('profile.lastName2')}
             </label>
             <input
@@ -134,12 +134,12 @@ export default function ProfilePage() {
               value={lastName2}
               onChange={(e) => setLastName2(e.target.value)}
               placeholder={t('profile.lastName2Placeholder')}
-              className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
+              className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-lg placeholder:text-ft-label focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-500">
+            <label className="mb-1 block text-sm font-medium text-ft-muted">
               {t('profile.email')}
             </label>
             <input
@@ -147,26 +147,26 @@ export default function ProfilePage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@example.com"
-              className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-lg placeholder-zinc-300 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-600"
+              className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-lg placeholder:text-ft-label focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
             />
           </div>
 
           {userEmail && (
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-xl border border-ft-border bg-ft-surface p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Mail size={16} className="text-zinc-400" />
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                  <Mail size={16} className="text-ft-muted" />
+                  <span className="text-sm text-ft-muted">
                     {userEmail}
                   </span>
                 </div>
                 {userEmailVerified ? (
-                  <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+                  <span className="flex items-center gap-1 text-xs font-medium text-ft-green-bright">
                     <ShieldCheck size={14} />
                     {t('auth.emailVerified')}
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-xs font-medium text-amber-600">
+                  <span className="flex items-center gap-1 text-xs font-medium text-ft-amber">
                     <ShieldAlert size={14} />
                     {t('auth.emailNotVerified')}
                   </span>
@@ -176,7 +176,7 @@ export default function ProfilePage() {
           )}
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-500">
+            <label className="mb-1 block text-sm font-medium text-ft-muted">
               {t('profile.language')}
             </label>
             <div className="flex gap-2">
@@ -184,8 +184,8 @@ export default function ProfilePage() {
                 onClick={() => setLanguage('en')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-base font-bold transition-all active:scale-95 ${
                   storeLanguage === 'en'
-                    ? 'bg-emerald-500 text-white shadow-sm'
-                    : 'border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900'
+                    ? 'bg-ft-green text-white shadow-sm'
+                    : 'border border-ft-border bg-ft-surface text-ft-muted'
                 }`}
               >
                 <Languages size={18} />
@@ -195,8 +195,8 @@ export default function ProfilePage() {
                 onClick={() => setLanguage('es')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-base font-bold transition-all active:scale-95 ${
                   storeLanguage === 'es'
-                    ? 'bg-emerald-500 text-white shadow-sm'
-                    : 'border border-zinc-200 bg-white text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900'
+                    ? 'bg-ft-green text-white shadow-sm'
+                    : 'border border-ft-border bg-ft-surface text-ft-muted'
                 }`}
               >
                 <Languages size={18} />
@@ -207,7 +207,7 @@ export default function ProfilePage() {
 
           <button
             onClick={handleSave}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-4 text-lg font-bold text-white shadow-sm transition-all active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-ft-green py-4 text-lg font-bold text-white shadow-sm transition-all active:scale-[0.98]"
           >
             <Save size={20} />
             {saved ? t('profile.saved') : t('profile.save')}

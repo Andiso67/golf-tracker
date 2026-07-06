@@ -3,17 +3,16 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Plus, BarChart3, Users, Settings } from 'lucide-react';
+import { LayoutDashboard, Edit3, ChartBar, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/i18n/useTranslation';
 import { lightTap } from '@/lib/haptics';
 
 const navLinks = [
-  { href: '/', icon: Home, key: 'nav.home' },
-  { href: '/new-round', icon: Plus, key: 'nav.new' },
-  { href: '/dashboard', icon: BarChart3, key: 'nav.stats' },
-  { href: '/players', icon: Users, key: 'nav.players' },
-  { href: '/settings', icon: Settings, key: 'nav.settings' },
+  { href: '/', icon: LayoutDashboard, key: 'nav.home' },
+  { href: '/new-round', icon: Edit3, key: 'nav.new' },
+  { href: '/dashboard', icon: ChartBar, key: 'nav.stats' },
+  { href: '/players', icon: User, key: 'nav.profile' },
 ];
 
 function NavContent() {
@@ -36,23 +35,23 @@ function NavContent() {
             {isActive && (
               <motion.div
                 layoutId="nav-pill"
-                className="absolute -top-2 h-1 w-6 rounded-full bg-emerald-500"
+                className="absolute -top-1 h-0.5 w-5 rounded-full bg-ft-green-bright"
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               />
             )}
             <Icon
-              size={22}
+              size={20}
               className={
                 isActive
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-zinc-400 dark:text-zinc-500'
+                  ? 'text-ft-green-bright'
+                  : 'text-ft-label'
               }
             />
             <span
-              className={`text-[10px] font-medium ${
+              className={`text-[9px] font-medium ${
                 isActive
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-zinc-400 dark:text-zinc-500'
+                  ? 'text-ft-green-bright'
+                  : 'text-ft-label'
               }`}
             >
               {t(key)}
@@ -66,7 +65,7 @@ function NavContent() {
 
 export default function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-200 bg-white/80 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80"
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-ft-border bg-ft-surface/80 backdrop-blur-xl"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div className="mx-auto flex max-w-lg items-center justify-around py-1">

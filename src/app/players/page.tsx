@@ -28,7 +28,7 @@ function PlayerAvatar({ firstName, size = 'md' }: { firstName: string; size?: 'm
   const sizeClass = size === 'lg' ? 'h-14 w-14 text-xl' : 'h-10 w-10 text-sm';
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 ${sizeClass}`}
+      className={`flex shrink-0 items-center justify-center rounded-full bg-ft-green/10 font-bold text-ft-green-bright ${sizeClass}`}
     >
       {initial}
     </div>
@@ -239,7 +239,7 @@ export default function PlayersPage() {
       >
         <Link
           href="/"
-          className="mb-3 inline-flex items-center gap-1 text-sm text-zinc-400"
+          className="mb-3 inline-flex items-center gap-1 text-sm text-ft-muted"
         >
           <ArrowLeft size={16} />
           {t('players.back')}
@@ -247,32 +247,32 @@ export default function PlayersPage() {
         <h1 className="text-2xl font-bold tracking-tight">
             {t('players.title')}
           </h1>
-          <p className="text-sm text-zinc-500">{t('players.subtitle')}</p>
+          <p className="text-sm text-ft-muted">{t('players.subtitle')}</p>
         </motion.div>
 
         {player && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30"
+            className="mb-4 rounded-xl border border-ft-green/20 bg-ft-green/10 p-4"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-lg font-bold text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-ft-green text-lg font-bold text-white">
                 {player.firstName?.charAt(0)?.toUpperCase() || '?'}
               </div>
               <div className="flex-1">
-                <p className="text-xs font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                <p className="text-xs font-medium uppercase tracking-wider text-ft-green-bright">
                   {t('players.currentSession')}
                 </p>
                 <p className="text-base font-bold">{playerFullName(player)}</p>
               </div>
-              <Check size={20} className="text-emerald-500" />
+              <Check size={20} className="text-ft-green-bright" />
             </div>
           </motion.div>
         )}
 
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-sm font-medium text-zinc-500">
+          <p className="text-sm font-medium text-ft-muted">
             {t('players.playerCount', { count: allPlayers.length })}
           </p>
           <button
@@ -280,7 +280,7 @@ export default function PlayersPage() {
               resetForm();
               setShowAddForm(true);
             }}
-            className="flex items-center gap-1 text-sm font-medium text-emerald-600 dark:text-emerald-400"
+            className="flex items-center gap-1 text-sm font-medium text-ft-green-bright"
           >
             <Plus size={16} />
             {t('players.addPlayer')}
@@ -288,13 +288,13 @@ export default function PlayersPage() {
         </div>
 
         <div className="relative mb-3">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ft-muted" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('players.searchPlaceholder')}
-            className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder-zinc-500"
+            className="w-full rounded-xl border border-ft-border bg-ft-surface py-2.5 pl-9 pr-4 text-sm outline-none focus:border-ft-green focus:ring-2 focus:ring-ft-green/20"
           />
         </div>
 
@@ -306,14 +306,14 @@ export default function PlayersPage() {
               exit={{ height: 0, opacity: 0 }}
               className="mb-4 overflow-hidden"
             >
-              <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="rounded-xl border border-ft-border bg-ft-surface p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="text-sm font-bold">
                     {editingId ? t('players.editPlayer') : t('players.addPlayer')}
                   </h3>
                   <button
                     onClick={resetForm}
-                    className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    className="rounded-lg p-1 text-ft-muted hover:bg-ft-surface"
                   >
                     <X size={16} />
                   </button>
@@ -324,7 +324,7 @@ export default function PlayersPage() {
                     value={formFirstName}
                     onChange={(e) => setFormFirstName(e.target.value)}
                     placeholder={t('players.firstNamePlaceholder')}
-                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
                     autoFocus
                   />
                   <input
@@ -332,14 +332,14 @@ export default function PlayersPage() {
                     value={formLastName1}
                     onChange={(e) => setFormLastName1(e.target.value)}
                     placeholder={t('players.lastName1Placeholder')}
-                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
                   />
                   <input
                     type="text"
                     value={formLastName2}
                     onChange={(e) => setFormLastName2(e.target.value)}
                     placeholder={t('players.lastName2Placeholder')}
-                    className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800"
+                    className="w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
                   />
                   <div className="flex gap-2">
                     <input
@@ -348,40 +348,40 @@ export default function PlayersPage() {
                       value={formLicenseNumber}
                       onChange={(e) => { setFormLicenseNumber(e.target.value); setVerifyState('idle'); setVerifyResult(null); }}
                       placeholder={t('players.licenseNumber')}
-                      className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800"
+                      className="flex-1 rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
                     />
                     <button
                       onClick={verifyLicense}
                       disabled={verifyState === 'loading' || !formLicenseNumber.trim() || !formFirstName.trim()}
                       className={`shrink-0 rounded-lg px-3 py-2 text-xs font-bold transition-all active:scale-95 ${
                         verifyState === 'loading'
-                          ? 'cursor-not-allowed bg-zinc-100 text-zinc-300 dark:bg-zinc-800'
+                          ? 'cursor-not-allowed bg-ft-surface text-ft-label'
                           : verifyState === 'valid'
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300'
+                          ? 'bg-ft-green/10 text-ft-green-bright'
                           : verifyState === 'mismatch'
-                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300'
-                          : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
+                          ? 'bg-ft-amber/10 text-ft-amber'
+                          : 'bg-ft-surface text-ft-label hover:bg-ft-border'
                       }`}
                     >
                       {verifyState === 'loading' ? t('players.verifyingLicense') : t('players.verifyLicense')}
                     </button>
                   </div>
                   {verifyState === 'valid' && verifyResult && (
-                    <p className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+                    <p className="flex items-center gap-1 text-xs text-ft-green-bright">
                       <Check size={12} />
                       {t('players.licenseValid')} · {t('players.rfegName', { name: verifyResult.rfegName })} · {t('players.rfegHandicap', { handicap: verifyResult.handicap })}
                     </p>
                   )}
                   {verifyState === 'mismatch' && verifyResult && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                    <p className="text-xs text-ft-amber">
                       {t('players.licenseMismatch')} · {t('players.rfegName', { name: verifyResult.rfegName })}
                     </p>
                   )}
                   {verifyState === 'notfound' && (
-                    <p className="text-xs text-rose-600 dark:text-rose-400">{t('players.licenseNotFound')}</p>
+                    <p className="text-xs text-ft-rose">{t('players.licenseNotFound')}</p>
                   )}
                   {verifyState === 'error' && (
-                    <p className="text-xs text-rose-600 dark:text-rose-400">{t('players.licenseError')}</p>
+                    <p className="text-xs text-ft-rose">{t('players.licenseError')}</p>
                   )}
                   <div className="flex gap-2.5">
                     <div className="flex-1">
@@ -393,14 +393,14 @@ export default function PlayersPage() {
                           onChange={(e) => setFormHandicap(e.target.value)}
                           placeholder={t('players.handicap')}
                           step="0.1"
-                          className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800"
+                          className="w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
                         />
                     </div>
                     <div className="flex-1">
                       <select
                         value={formHomeCourse}
                         onChange={(e) => setFormHomeCourse(e.target.value)}
-                        className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800"
+                        className="w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-sm focus:border-ft-green focus:outline-none focus:ring-2 focus:ring-ft-green/20"
                       >
                         <option value="">{t('players.noCourse')}</option>
                         {courses.map((c) => (
@@ -417,8 +417,8 @@ export default function PlayersPage() {
                   disabled={!formFirstName.trim()}
                   className={`mt-3 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-bold ${
                     formFirstName.trim()
-                      ? 'bg-emerald-500 text-white'
-                      : 'cursor-not-allowed bg-zinc-100 text-zinc-300 dark:bg-zinc-800'
+                      ? 'bg-ft-green text-white'
+                      : 'cursor-not-allowed bg-ft-surface text-ft-label'
                   }`}
                 >
                   <Save size={16} />
@@ -431,16 +431,16 @@ export default function PlayersPage() {
 
         {sortedPlayers.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-              <Users size={28} className="text-zinc-300 dark:text-zinc-600" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-ft-surface">
+              <Users size={28} className="text-ft-label" />
             </div>
-            <p className="text-sm text-zinc-400">{t('players.noPlayers')}</p>
+            <p className="text-sm text-ft-muted">{t('players.noPlayers')}</p>
             <button
               onClick={() => {
                 resetForm();
                 setShowAddForm(true);
               }}
-              className="rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm"
+              className="rounded-xl bg-ft-green px-4 py-2.5 text-sm font-bold text-white shadow-sm"
             >
               {t('players.addFirstPlayer')}
             </button>
@@ -463,28 +463,28 @@ export default function PlayersPage() {
                     exit={{ opacity: 0, scale: 0.95 }}
                     className={`rounded-xl border p-3 transition-colors ${
                       isActive
-                        ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30'
-                        : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'
+                        ? 'border-ft-green/20 bg-ft-green/10'
+                        : 'border-ft-border bg-ft-surface'
                     }`}
                   >
                     {isDeleting ? (
                       <div className="flex flex-col items-center gap-3 py-2 text-center">
-                        <p className="text-sm font-bold text-rose-600 dark:text-rose-400">
+                        <p className="text-sm font-bold text-ft-rose">
                           {t('players.deleteConfirm')}
                         </p>
-                        <p className="text-xs text-zinc-400">
+                        <p className="text-xs text-ft-muted">
                           {t('players.deleteWarning')}
                         </p>
                         <div className="flex gap-2">
                           <button
                             onClick={() => setDeleteConfirmId(null)}
-                            className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
+                            className="rounded-lg border border-ft-border px-4 py-2 text-sm font-medium text-ft-label"
                           >
                             {t('players.cancel')}
                           </button>
                           <button
                             onClick={() => handleDelete(p.id)}
-                            className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-bold text-white"
+                            className="rounded-lg bg-ft-rose px-4 py-2 text-sm font-bold text-white"
                           >
                             {t('players.delete')}
                           </button>
@@ -497,13 +497,13 @@ export default function PlayersPage() {
                           <p className="truncate text-sm font-bold">
                             {playerFullName(p)}
                             {isActive && (
-                              <span className="ml-1.5 inline-flex items-center gap-0.5 rounded bg-emerald-200 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-700 dark:bg-emerald-800 dark:text-emerald-300">
+                              <span className="ml-1.5 inline-flex items-center gap-0.5 rounded bg-ft-green/20 px-1.5 py-0.5 text-[9px] font-bold uppercase text-ft-green-bright">
                                 <Check size={8} />
                                 {t('players.activePlayer')}
                               </span>
                             )}
                           </p>
-                          <p className="truncate text-xs text-zinc-400">
+                          <p className="truncate text-xs text-ft-muted">
                             {p.handicap} HCP
                             {p.homeCourse ? ` · ${p.homeCourse}` : ''}
                             {p.licenseNumber ? ` · Lic: ${p.licenseNumber}` : ''}
@@ -513,7 +513,7 @@ export default function PlayersPage() {
                           {isOwnPlayer && (
                             <button
                               onClick={() => startEdit(p)}
-                              className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              className="rounded-lg p-1.5 text-ft-muted hover:bg-ft-surface"
                             >
                               <Pencil size={14} />
                             </button>
@@ -521,7 +521,7 @@ export default function PlayersPage() {
                           {isOwnPlayer && players.length > 1 && !isActive && (
                             <button
                               onClick={() => setDeleteConfirmId(p.id)}
-                              className="rounded-lg p-1.5 text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950"
+                              className="rounded-lg p-1.5 text-ft-rose hover:bg-ft-rose/10"
                             >
                               <Trash2 size={14} />
                             </button>

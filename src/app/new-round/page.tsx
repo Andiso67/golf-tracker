@@ -21,7 +21,7 @@ function NewRoundContent() {
       >
         <Link
           href="/"
-          className="mb-3 inline-flex items-center gap-1 text-sm text-zinc-400"
+          className="mb-3 inline-flex items-center gap-1 text-sm text-ft-muted"
         >
           <ArrowLeft size={16} />
           {t('newRound.back')}
@@ -29,7 +29,7 @@ function NewRoundContent() {
         <h1 className="text-2xl font-bold tracking-tight">
           {t('newRound.title')}
         </h1>
-        <p className="text-sm text-zinc-500">{t('newRound.subtitle')}</p>
+        <p className="text-sm text-ft-muted">{t('newRound.subtitle')}</p>
       </motion.div>
       <NewRoundForm />
     </div>
@@ -42,8 +42,8 @@ export default function NewRoundPage() {
       <ErrorBoundary
         fallback={
           <div className="mx-auto flex max-w-lg flex-1 flex-col items-center justify-center p-8 text-center">
-            <p className="text-zinc-500">Something went wrong</p>
-            <Link href="/" className="mt-2 text-sm font-medium text-emerald-600">
+            <p className="text-ft-muted">Something went wrong</p>
+            <Link href="/" className="mt-2 text-sm font-medium text-ft-green-bright">
               Go home
             </Link>
           </div>
@@ -52,7 +52,7 @@ export default function NewRoundPage() {
         <Suspense
           fallback={
             <div className="mx-auto flex max-w-lg flex-1 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-ft-green-bright border-t-transparent" />
             </div>
           }
         >

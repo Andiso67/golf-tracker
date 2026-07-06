@@ -52,7 +52,7 @@ export default function VerifyEmailPage({
   }, [searchParams, t]);
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
+    <div className="flex min-h-dvh items-center justify-center bg-ft-bg px-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -60,18 +60,18 @@ export default function VerifyEmailPage({
       >
         {status === 'loading' && (
           <div className="space-y-4">
-            <Loader2 size={48} className="mx-auto animate-spin text-emerald-500" />
-            <p className="text-sm text-zinc-500">{t('auth.verifyEmail')}...</p>
+            <Loader2 size={48} className="mx-auto animate-spin text-ft-green-bright" />
+            <p className="text-sm text-ft-muted">{t('auth.verifyEmail')}...</p>
           </div>
         )}
 
         {status === 'success' && (
           <div className="space-y-4">
-            <CheckCircle2 size={48} className="mx-auto text-emerald-500" />
-            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{message}</h2>
+            <CheckCircle2 size={48} className="mx-auto text-ft-green-bright" />
+            <h2 className="text-xl font-bold text-ft-text">{message}</h2>
             <button
               onClick={() => router.push('/')}
-              className="rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+              className="rounded-xl bg-ft-green px-6 py-2.5 text-sm font-semibold text-white hover:bg-ft-green/90"
             >
               {t('home.appTitle')}
             </button>
@@ -80,11 +80,11 @@ export default function VerifyEmailPage({
 
         {status === 'error' && (
           <div className="space-y-4">
-            <XCircle size={48} className="mx-auto text-rose-500" />
-            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{message}</h2>
+            <XCircle size={48} className="mx-auto text-ft-rose" />
+            <h2 className="text-xl font-bold text-ft-text">{message}</h2>
             <button
               onClick={() => router.push('/login')}
-              className="rounded-xl bg-zinc-800 px-6 py-2.5 text-sm font-semibold text-white hover:bg-zinc-700 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+              className="rounded-xl bg-ft-card px-6 py-2.5 text-sm font-semibold text-white hover:bg-ft-card/80"
             >
               {t('auth.backToLogin')}
             </button>

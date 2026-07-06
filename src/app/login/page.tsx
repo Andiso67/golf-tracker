@@ -78,7 +78,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-zinc-50 px-4 pb-[env(safe-area-inset-bottom,0px)] pt-[env(safe-area-inset-top,0px)] dark:bg-zinc-950">
+    <div className="flex min-h-dvh items-center justify-center bg-ft-bg px-4 pb-[env(safe-area-inset-bottom,0px)] pt-[env(safe-area-inset-top,0px)]">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -86,10 +86,10 @@ export default function LoginPage() {
       >
           <div className="mb-8 text-center">
             <img src="/icons/icon.svg" alt="18Stats" className="mx-auto mb-4 h-20 w-20" />
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+            <h1 className="text-2xl font-bold tracking-tight text-ft-text">
               18Stats
             </h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-ft-muted">
             {mode === 'login' ? t('auth.login') : t('auth.register')}
           </p>
         </div>
@@ -99,7 +99,7 @@ export default function LoginPage() {
             <motion.p
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600 dark:bg-rose-950/50 dark:text-rose-400"
+              className="rounded-lg bg-ft-rose/10 px-3 py-2 text-xs font-medium text-ft-rose"
             >
               {error}
             </motion.p>
@@ -108,7 +108,7 @@ export default function LoginPage() {
           {mode === 'register' && (
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-500">
+                <label className="mb-1 block text-xs font-medium text-ft-muted">
                   {t('auth.firstName')}
                 </label>
                 <input
@@ -117,12 +117,12 @@ export default function LoginPage() {
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder={t('auth.firstNamePlaceholder')}
                   required
-                  className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-900"
+                  className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-sm outline-none focus:border-ft-green"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-500">
+                  <label className="mb-1 block text-xs font-medium text-ft-muted">
                     {t('auth.lastName1')}
                   </label>
                   <input
@@ -130,11 +130,11 @@ export default function LoginPage() {
                     value={lastName1}
                     onChange={(e) => setLastName1(e.target.value)}
                     placeholder={t('auth.lastName1Placeholder')}
-                    className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-900"
+                    className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-sm outline-none focus:border-ft-green"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-500">
+                  <label className="mb-1 block text-xs font-medium text-ft-muted">
                     {t('auth.lastName2')}
                   </label>
                   <input
@@ -142,7 +142,7 @@ export default function LoginPage() {
                     value={lastName2}
                     onChange={(e) => setLastName2(e.target.value)}
                     placeholder={t('auth.lastName2Placeholder')}
-                    className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-900"
+                    className="w-full rounded-xl border border-ft-border bg-ft-surface px-4 py-3 text-sm outline-none focus:border-ft-green"
                   />
                 </div>
               </div>
@@ -150,28 +150,28 @@ export default function LoginPage() {
           )}
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-500">
+            <label className="mb-1 block text-xs font-medium text-ft-muted">
               {t('auth.email')}
             </label>
             <div className="relative">
-              <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ft-muted" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('auth.emailPlaceholder')}
                 required
-                className="w-full rounded-xl border border-zinc-200 bg-white py-3 pl-11 pr-4 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-900"
+                className="w-full rounded-xl border border-ft-border bg-ft-surface py-3 pl-11 pr-4 text-sm outline-none focus:border-ft-green"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-500">
+            <label className="mb-1 block text-xs font-medium text-ft-muted">
               {t('auth.password')}
             </label>
             <div className="relative">
-              <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ft-muted" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
@@ -179,12 +179,12 @@ export default function LoginPage() {
                 placeholder={t('auth.passwordPlaceholder')}
                 required
                 minLength={6}
-                className="w-full rounded-xl border border-zinc-200 bg-white py-3 pl-11 pr-11 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-900"
+                className="w-full rounded-xl border border-ft-border bg-ft-surface py-3 pl-11 pr-11 text-sm outline-none focus:border-ft-green"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-ft-muted"
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -193,11 +193,11 @@ export default function LoginPage() {
 
           {mode === 'register' && (
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-500">
+              <label className="mb-1 block text-xs font-medium text-ft-muted">
                 {t('auth.confirmPassword')}
               </label>
               <div className="relative">
-                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ft-muted" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
@@ -205,7 +205,7 @@ export default function LoginPage() {
                   placeholder={t('auth.confirmPassword')}
                   required
                   minLength={6}
-                  className="w-full rounded-xl border border-zinc-200 bg-white py-3 pl-11 pr-4 text-sm outline-none focus:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-900"
+                  className="w-full rounded-xl border border-ft-border bg-ft-surface py-3 pl-11 pr-4 text-sm outline-none focus:border-ft-green"
                 />
               </div>
             </div>
@@ -214,7 +214,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white transition-all hover:bg-emerald-700 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-ft-green py-3 text-sm font-semibold text-white transition-all hover:bg-ft-green/90 disabled:opacity-50"
           >
             {loading ? (
               <Loader2 size={16} className="animate-spin" />
@@ -226,11 +226,11 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 space-y-3 text-center text-sm">
-          <p className="text-zinc-500">
+          <p className="text-ft-muted">
             {mode === 'login' ? t('auth.noAccount') : t('auth.hasAccount')}{' '}
             <button
               onClick={switchMode}
-              className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
+              className="font-medium text-ft-green-bright hover:text-ft-green-bright"
             >
               {mode === 'login' ? t('auth.createOne') : t('auth.logInHere')}
             </button>
@@ -238,7 +238,7 @@ export default function LoginPage() {
           {mode === 'login' && (
             <Link
               href="/forgot-password"
-              className="block text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+              className="block text-xs text-ft-muted hover:text-ft-text"
             >
               {t('auth.forgotPassword')}
             </Link>

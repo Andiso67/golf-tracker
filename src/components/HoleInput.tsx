@@ -2,7 +2,17 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Minus, Plus, Crosshair, GripHorizontal, ArrowLeft, ArrowRight, Target } from 'lucide-react';
+import {
+  Check,
+  Minus,
+  Plus,
+  Crosshair,
+  GripHorizontal,
+  ArrowLeft,
+  ArrowRight,
+  Target,
+  X,
+} from 'lucide-react';
 import { HoleData } from '@/types';
 import { useTranslation } from '@/i18n/useTranslation';
 import { mediumTap } from '@/lib/haptics';
@@ -73,16 +83,16 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
   const canSave = score > 0;
 
   return (
-    <div className="space-y-4 rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-900">
+    <div className="space-y-5 rounded-xl border border-ft-border bg-ft-card p-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-ft-label">
             {t('holeInput.hole', { number: hole.number })}
           </p>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-ft-muted">
             {t('holeInput.par', { par: hole.par })}
             {hole.handicap != null && (
-              <span className="ml-2 rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 dark:bg-zinc-800">
+              <span className="ml-2 rounded-md border border-ft-border bg-ft-surface px-1.5 py-0.5 text-[10px] font-medium text-ft-label">
                 HCP {hole.handicap}
               </span>
             )}
@@ -94,7 +104,7 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
-              className="flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300"
+              className="flex items-center gap-1 rounded-full bg-ft-green/20 px-3 py-1 text-sm font-medium text-ft-green-bright"
             >
               <Check size={16} />
               {t('holeInput.saved')}
@@ -104,72 +114,110 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-medium text-zinc-500">
+        <label className="mb-2 block text-[11px] font-medium uppercase tracking-wider text-ft-label">
           {t('holeInput.score')}
         </label>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center gap-4">
           <button
             onClick={() => setScore(Math.max(0, score - 1))}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90 hover:border-ft-green/50"
           >
-            <Minus size={20} />
+            <Minus size={22} />
           </button>
-          <span className="min-w-[3ch] text-center text-3xl font-bold tabular-nums">
+          <span className="font-mono min-w-[3ch] text-center text-4xl font-bold text-ft-text">
             {score || '-'}
           </span>
           <button
             onClick={() => setScore(score + 1)}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90 hover:border-ft-green/50"
           >
-            <Plus size={20} />
+            <Plus size={22} />
           </button>
         </div>
       </div>
 
       <div>
-        <label className="mb-2 block text-xs font-medium text-zinc-500">
+        <label className="mb-2 block text-[11px] font-medium uppercase tracking-wider text-ft-label">
+          {t('holeInput.putts')}
+        </label>
+        <div className="flex items-center justify-center gap-4">
+          <button
+            onClick={() => setPutts(Math.max(0, putts - 1))}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90 hover:border-ft-green/50"
+          >
+            <Minus size={18} />
+          </button>
+          <span className="font-mono min-w-[2ch] text-center text-2xl font-bold text-ft-text">
+            {putts}
+          </span>
+          <button
+            onClick={() => setPutts(putts + 1)}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-ft-border bg-ft-surface text-ft-text transition-all active:scale-90 hover:border-ft-green/50"
+          >
+            <Plus size={18} />
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-[11px] font-medium uppercase tracking-wider text-ft-label">
           {t('holeInput.fairwayHit')}
         </label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-4 gap-2">
           <button
             onClick={() => handleFairwayTap('Left')}
             className={`flex flex-col items-center gap-1.5 rounded-xl py-3 text-xs font-medium transition-all active:scale-95 ${
               fairwayHit === 'Left'
-                ? 'bg-amber-500 text-white shadow-sm'
-                : 'border border-zinc-200 bg-white text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800'
+                ? 'bg-ft-amber text-white shadow-sm'
+                : 'border border-ft-border bg-ft-surface text-ft-muted'
             }`}
           >
-            <ArrowLeft size={22} className={fairwayHit === 'Left' ? 'text-white' : 'text-amber-400'} />
+            <ArrowLeft size={20} className={fairwayHit === 'Left' ? 'text-white' : 'text-ft-amber'} />
             {t('holeInput.left')}
           </button>
           <button
             onClick={() => handleFairwayTap('Fairway')}
             className={`flex flex-col items-center gap-1.5 rounded-xl py-3 text-xs font-medium transition-all active:scale-95 ${
               fairwayHit === 'Fairway'
-                ? 'bg-emerald-500 text-white shadow-sm'
-                : 'border border-zinc-200 bg-white text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800'
+                ? 'bg-ft-green text-white shadow-sm'
+                : 'border border-ft-border bg-ft-surface text-ft-muted'
             }`}
           >
-            <Target size={22} className={fairwayHit === 'Fairway' ? 'text-white' : 'text-emerald-400'} />
+            <Target size={20} className={fairwayHit === 'Fairway' ? 'text-white' : 'text-ft-green-bright'} />
             {t('holeInput.fairway')}
           </button>
           <button
             onClick={() => handleFairwayTap('Right')}
             className={`flex flex-col items-center gap-1.5 rounded-xl py-3 text-xs font-medium transition-all active:scale-95 ${
               fairwayHit === 'Right'
-                ? 'bg-amber-500 text-white shadow-sm'
-                : 'border border-zinc-200 bg-white text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800'
+                ? 'bg-ft-amber text-white shadow-sm'
+                : 'border border-ft-border bg-ft-surface text-ft-muted'
             }`}
           >
-            <ArrowRight size={22} className={fairwayHit === 'Right' ? 'text-white' : 'text-amber-400'} />
+            <ArrowRight size={20} className={fairwayHit === 'Right' ? 'text-white' : 'text-ft-amber'} />
             {t('holeInput.right')}
+          </button>
+          <button
+            onClick={() => {
+              if (fairwayHit !== null) {
+                setFairwayHit(null);
+              }
+            }}
+            className={`flex flex-col items-center gap-1.5 rounded-xl py-3 text-xs font-medium transition-all active:scale-95 ${
+              fairwayHit === null
+                ? 'border border-ft-rose/50 bg-ft-rose/10 text-ft-rose'
+                : 'border border-ft-border bg-ft-surface text-ft-muted'
+            }`}
+          >
+            <X size={20} className={fairwayHit === null ? 'text-ft-rose' : 'text-ft-label'} />
+            {t('holeInput.miss')}
           </button>
         </div>
       </div>
 
       <div className="flex gap-3">
         <div className="flex-1">
-          <label className="mb-1 block text-xs font-medium text-zinc-500">
+          <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-ft-label">
             {t('holeInput.gir')}
           </label>
           <div className="flex gap-1.5">
@@ -177,8 +225,8 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
               onClick={() => setGir(gir === true ? null : true)}
               className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all active:scale-95 ${
                 gir === true
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800'
+                  ? 'bg-ft-green text-white'
+                  : 'border border-ft-border bg-ft-surface text-ft-muted'
               }`}
             >
               {t('holeInput.yes')}
@@ -187,8 +235,8 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
               onClick={() => setGir(gir === false ? null : false)}
               className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all active:scale-95 ${
                 gir === false
-                  ? 'bg-rose-500 text-white'
-                  : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800'
+                  ? 'bg-ft-rose text-white'
+                  : 'border border-ft-border bg-ft-surface text-ft-muted'
               }`}
             >
               {t('holeInput.no')}
@@ -197,22 +245,22 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
         </div>
 
         <div className="flex-1">
-          <label className="mb-1 block text-xs font-medium text-zinc-500">
+          <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-ft-label">
             {t('holeInput.sandSave')}
           </label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <button
               onClick={() => setSandSave(Math.max(0, sandSave - 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-ft-border bg-ft-surface text-ft-muted transition-all active:scale-90"
             >
               <Minus size={16} />
             </button>
-            <span className="min-w-[2ch] text-center text-lg font-bold tabular-nums">
+            <span className="font-mono min-w-[2ch] text-center text-lg font-bold text-ft-text">
               {sandSave}
             </span>
             <button
               onClick={() => setSandSave(sandSave + 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-ft-border bg-ft-surface text-ft-muted transition-all active:scale-90"
             >
               <Plus size={16} />
             </button>
@@ -220,22 +268,22 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
         </div>
 
         <div className="flex-1">
-          <label className="mb-1 block text-xs font-medium text-zinc-500">
+          <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-ft-label">
             {t('holeInput.approach')}
           </label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <button
               onClick={() => setApproach(Math.max(0, approach - 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-ft-border bg-ft-surface text-ft-muted transition-all active:scale-90"
             >
               <Minus size={16} />
             </button>
-            <span className="min-w-[2ch] text-center text-lg font-bold tabular-nums">
+            <span className="font-mono min-w-[2ch] text-center text-lg font-bold text-ft-text">
               {approach}
             </span>
             <button
               onClick={() => setApproach(approach + 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-ft-border bg-ft-surface text-ft-muted transition-all active:scale-90"
             >
               <Plus size={16} />
             </button>
@@ -245,45 +293,22 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
 
       <div className="flex gap-3">
         <div className="flex-1">
-          <label className="mb-1 block text-xs font-medium text-zinc-500">
-            {t('holeInput.putts')}
-          </label>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPutts(Math.max(0, putts - 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
-            >
-              <Minus size={16} />
-            </button>
-            <span className="min-w-[2ch] text-center text-lg font-bold tabular-nums">
-              {putts}
-            </span>
-            <button
-              onClick={() => setPutts(putts + 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
-            >
-              <Plus size={16} />
-            </button>
-          </div>
-        </div>
-
-        <div className="flex-1">
-          <label className="mb-1 block text-xs font-medium text-zinc-500">
+          <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-ft-label">
             {t('holeInput.penalties')}
           </label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <button
               onClick={() => setPenalties(Math.max(0, penalties - 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-ft-border bg-ft-surface text-ft-muted transition-all active:scale-90"
             >
               <Minus size={16} />
             </button>
-            <span className="min-w-[2ch] text-center text-lg font-bold tabular-nums">
+            <span className="font-mono min-w-[2ch] text-center text-lg font-bold text-ft-text">
               {penalties}
             </span>
             <button
               onClick={() => setPenalties(penalties + 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 active:scale-90 dark:bg-zinc-800 dark:text-zinc-300"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-ft-border bg-ft-surface text-ft-muted transition-all active:scale-90"
             >
               <Plus size={16} />
             </button>
@@ -292,7 +317,7 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-zinc-500">
+        <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-ft-label">
           {t('holeInput.puttDistance')}
         </label>
         <div className="flex gap-1.5">
@@ -302,8 +327,8 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
               onClick={() => setPuttDistance(puttDistance === d ? null : d)}
               className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all active:scale-95 ${
                 puttDistance === d
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800'
+                  ? 'bg-ft-green text-white'
+                  : 'border border-ft-border bg-ft-surface text-ft-muted'
               }`}
             >
               {t(`holeInput.puttDistances.${d}`)}
@@ -314,7 +339,7 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
 
       <button
         onClick={() => setShowDistance(!showDistance)}
-        className="flex items-center gap-2 text-xs font-medium text-zinc-400"
+        className="flex items-center gap-2 text-xs font-medium text-ft-label"
       >
         <Crosshair size={14} />
         {showDistance ? t('holeInput.hideDistance') : t('holeInput.addDistance')}
@@ -328,7 +353,7 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <label className="mb-1 block text-xs font-medium text-zinc-500">
+            <label className="mb-1 block text-xs font-medium text-ft-label">
               {t('holeInput.distanceLabel')}
             </label>
             <input
@@ -340,7 +365,7 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
                 setDistance(e.target.value ? parseInt(e.target.value) : null)
               }
               placeholder={t('holeInput.distancePlaceholder')}
-              className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-lg dark:border-zinc-700 dark:bg-zinc-800"
+              className="w-full rounded-lg border border-ft-border bg-ft-surface px-3 py-2 text-lg text-ft-text placeholder:text-ft-label focus:border-ft-green focus:outline-none"
             />
           </motion.div>
         )}
@@ -349,10 +374,10 @@ export default function HoleInput({ hole, onSave }: HoleInputProps) {
       <button
         onClick={handleSave}
         disabled={!canSave}
-        className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-bold transition-all active:scale-[0.98] ${
+        className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold transition-all active:scale-[0.98] ${
           canSave
-            ? 'bg-emerald-500 text-white shadow-sm hover:bg-emerald-600'
-            : 'cursor-not-allowed bg-zinc-100 text-zinc-300 dark:bg-zinc-800'
+            ? 'bg-ft-green text-white shadow-sm hover:bg-ft-green/90'
+            : 'cursor-not-allowed bg-ft-card text-ft-label'
         }`}
       >
         <GripHorizontal size={18} />

@@ -27,42 +27,42 @@ export default function ScorecardTable({
 
   if (compact) {
     return (
-      <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-700">
+      <div className="overflow-x-auto rounded-xl border border-ft-border">
         <table className="w-full text-center text-xs">
           <thead>
-            <tr className="bg-zinc-50 dark:bg-zinc-800/50">
-              <th className="px-1.5 py-1.5 font-medium text-zinc-400">
+            <tr className="bg-ft-surface">
+              <th className="px-1.5 py-1.5 font-medium text-ft-label">
                 {t('scorecard.hole')}
               </th>
               {holes.map((h) => (
                 <th
                   key={h.number}
-                  className="px-1.5 py-1.5 font-medium text-zinc-400"
+                  className="px-1.5 py-1.5 font-medium text-ft-label"
                 >
                   {h.number}
                 </th>
               ))}
-              <th className="px-1.5 py-1.5 font-medium text-zinc-400">
+              <th className="px-1.5 py-1.5 font-medium text-ft-label">
                 {t('scorecard.total')}
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr className="border-t border-zinc-100 dark:border-zinc-800">
-              <td className="px-1.5 py-1 font-medium text-zinc-400">
+            <tr className="border-t border-ft-border">
+              <td className="px-1.5 py-1 font-medium text-ft-label">
                 {t('scorecard.par')}
               </td>
               {holes.map((h) => (
-                <td key={h.number} className="px-1.5 py-1 text-zinc-500">
+                <td key={h.number} className="px-1.5 py-1 text-ft-muted">
                   {h.par}
                 </td>
               ))}
-              <td className="px-1.5 py-1 font-medium text-zinc-500">
+              <td className="px-1.5 py-1 font-medium text-ft-muted">
                 {totalPar}
               </td>
             </tr>
-            <tr className="border-t border-zinc-100 dark:border-zinc-800">
-              <td className="px-1.5 py-1 font-medium text-zinc-400">
+            <tr className="border-t border-ft-border">
+              <td className="px-1.5 py-1 font-medium text-ft-label">
                 {gameMode === 'stableford' ? t('scorecard.pts') : t('scorecard.you')}
               </td>
               {holes.map((h) => {
@@ -72,36 +72,36 @@ export default function ScorecardTable({
                   : (h.score > 0 ? h.score : '-');
                 const colorClass = gameMode === 'stableford'
                   ? pts >= 3
-                    ? 'text-emerald-600 dark:text-emerald-400'
+                    ? 'text-ft-green-bright'
                     : pts === 2
-                      ? 'text-zinc-800 dark:text-zinc-200'
+                      ? 'text-ft-text'
                       : pts > 0
-                        ? 'text-amber-600 dark:text-amber-400'
-                        : 'text-zinc-300 dark:text-zinc-600'
+                        ? 'text-ft-amber'
+                        : 'text-ft-label'
                   : h.score > 0
                     ? h.score < h.par
-                      ? 'text-emerald-600 dark:text-emerald-400'
+                      ? 'text-ft-green-bright'
                       : h.score === h.par
-                        ? 'text-zinc-800 dark:text-zinc-200'
-                        : 'text-rose-600 dark:text-rose-400'
-                    : 'text-zinc-300 dark:text-zinc-600';
+                        ? 'text-ft-text'
+                        : 'text-ft-rose'
+                    : 'text-ft-label';
                 return (
-                  <td key={h.number} className={`px-1.5 py-1 font-bold tabular-nums ${colorClass}`}>
+                  <td key={h.number} className={`px-1.5 py-1 font-bold font-mono tabular-nums ${colorClass}`}>
                     {display}
                   </td>
                 );
               })}
               <td
-                className={`px-1.5 py-1 font-bold ${
+                className={`px-1.5 py-1 font-bold font-mono ${
                   totalScore > 0
                     ? gameMode === 'stableford'
-                      ? 'text-emerald-600 dark:text-emerald-400'
+                      ? 'text-ft-green-bright'
                       : totalScore < totalPar
-                        ? 'text-emerald-600 dark:text-emerald-400'
+                        ? 'text-ft-green-bright'
                         : totalScore === totalPar
-                          ? 'text-zinc-800 dark:text-zinc-200'
-                          : 'text-rose-600 dark:text-rose-400'
-                    : 'text-zinc-300 dark:text-zinc-600'
+                          ? 'text-ft-text'
+                          : 'text-ft-rose'
+                    : 'text-ft-label'
                 }`}
               >
                 {totalScore > 0
@@ -118,40 +118,40 @@ export default function ScorecardTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-700">
+    <div className="overflow-x-auto rounded-xl border border-ft-border">
       <table className="w-full text-center text-xs">
         <thead>
-          <tr className="bg-zinc-50 dark:bg-zinc-800/50">
-            <th className="px-2 py-2 font-medium text-zinc-400">
+          <tr className="bg-ft-surface">
+            <th className="px-2 py-2 font-medium text-ft-label">
               {t('scorecard.hash')}
             </th>
-            <th className="px-2 py-2 font-medium text-zinc-400">
+            <th className="px-2 py-2 font-medium text-ft-label">
               {t('scorecard.par')}
             </th>
-            <th className="px-2 py-2 font-medium text-zinc-400">
+            <th className="px-2 py-2 font-medium text-ft-label">
               {t('scorecard.score')}
             </th>
             {gameMode === 'stableford' && (
-              <th className="px-2 py-2 font-medium text-zinc-400">
+              <th className="px-2 py-2 font-medium text-ft-label">
                 {t('scorecard.pts')}
               </th>
             )}
-            <th className="px-2 py-2 font-medium text-zinc-400">
+            <th className="px-2 py-2 font-medium text-ft-label">
               {t('scorecard.fw')}
             </th>
-            <th className="px-2 py-2 font-medium text-zinc-400">
+            <th className="px-2 py-2 font-medium text-ft-label">
               {t('scorecard.gir')}
             </th>
-            <th className="px-2 py-2 font-medium text-zinc-400">
+            <th className="px-2 py-2 font-medium text-ft-label">
               {t('scorecard.putts')}
             </th>
-            <th className="px-2 py-2 font-medium text-zinc-400">
+            <th className="px-2 py-2 font-medium text-ft-label">
               {t('scorecard.pen')}
             </th>
-            <th className="px-2 py-2 font-medium text-zinc-400">
+            <th className="px-2 py-2 font-medium text-ft-label">
               {t('scorecard.sand')}
             </th>
-            <th className="px-2 py-2 font-medium text-zinc-400">
+            <th className="px-2 py-2 font-medium text-ft-label">
               {t('scorecard.app')}
             </th>
           </tr>
@@ -160,27 +160,27 @@ export default function ScorecardTable({
           {holes.map((h) => (
             <tr
               key={h.number}
-              className="border-t border-zinc-100 dark:border-zinc-800"
+              className="border-t border-ft-border"
             >
-              <td className="px-2 py-2 font-medium text-zinc-500">
+              <td className="px-2 py-2 font-medium text-ft-muted">
                 {h.number}
               </td>
-              <td className="px-2 py-2 text-zinc-400">{h.par}</td>
+              <td className="px-2 py-2 text-ft-muted">{h.par}</td>
               <td
-                className={`px-2 py-2 font-bold tabular-nums ${
+                className={`px-2 py-2 font-bold font-mono tabular-nums ${
                   h.score > 0
                     ? h.score < h.par
-                      ? 'text-emerald-600 dark:text-emerald-400'
+                      ? 'text-ft-green-bright'
                       : h.score === h.par
-                        ? 'text-zinc-800 dark:text-zinc-200'
-                        : 'text-rose-600 dark:text-rose-400'
-                    : 'text-zinc-300 dark:text-zinc-600'
+                        ? 'text-ft-text'
+                        : 'text-ft-rose'
+                    : 'text-ft-label'
                 }`}
               >
                 {h.score > 0 ? h.score : '-'}
               </td>
               {gameMode === 'stableford' && (
-                <td className="px-2 py-2 font-bold tabular-nums">
+                <td className="px-2 py-2 font-bold font-mono tabular-nums">
                   {h.score > 0 ? stablefordPoints(h.score, h.par) : '-'}
                 </td>
               )}
@@ -188,12 +188,12 @@ export default function ScorecardTable({
                 <span
                   className={`inline-block h-5 w-5 rounded-full text-[10px] font-bold leading-5 ${
                     h.fairwayHit === 'Yes'
-                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300'
+                      ? 'bg-ft-green/20 text-ft-green-bright'
                       : h.fairwayHit === 'No'
-                        ? 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
+                        ? 'bg-ft-surface text-ft-muted'
                         : h.fairwayHit
-                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300'
-                          : 'text-zinc-300 dark:text-zinc-600'
+                          ? 'bg-ft-amber/20 text-ft-amber'
+                          : 'text-ft-label'
                   }`}
                 >
                   {h.fairwayHit === 'Yes'
@@ -212,38 +212,38 @@ export default function ScorecardTable({
                   <span
                     className={`font-bold ${
                       h.gir
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-zinc-400 dark:text-zinc-500'
+                        ? 'text-ft-green-bright'
+                        : 'text-ft-muted'
                     }`}
                   >
                     {h.gir ? 'Y' : 'N'}
                   </span>
                 ) : (
-                  <span className="text-zinc-300 dark:text-zinc-600">-</span>
+                  <span className="text-ft-label">-</span>
                 )}
               </td>
-              <td className="px-2 py-2 tabular-nums">
+              <td className="px-2 py-2 font-mono tabular-nums">
                 {h.putts > 0 ? h.putts : '-'}
               </td>
-              <td className="px-2 py-2 tabular-nums">
+              <td className="px-2 py-2 font-mono tabular-nums">
                 {h.penalties > 0 ? (
-                  <span className="text-rose-500">{h.penalties}</span>
+                  <span className="text-ft-rose">{h.penalties}</span>
                 ) : (
                   '-'
                 )}
               </td>
-              <td className="px-2 py-2 tabular-nums">
+              <td className="px-2 py-2 font-mono tabular-nums">
                 {h.sandSave > 0 ? (
-                  <span className="text-amber-500 font-bold">{h.sandSave}</span>
+                  <span className="text-ft-amber font-bold">{h.sandSave}</span>
                 ) : (
-                  <span className="text-zinc-300 dark:text-zinc-600">-</span>
+                  <span className="text-ft-label">-</span>
                 )}
               </td>
-              <td className="px-2 py-2 tabular-nums">
+              <td className="px-2 py-2 font-mono tabular-nums">
                 {h.approach > 0 ? (
-                  <span className="text-blue-500 font-bold">{h.approach}</span>
+                  <span className="text-ft-blue font-bold">{h.approach}</span>
                 ) : (
-                  <span className="text-zinc-300 dark:text-zinc-600">-</span>
+                  <span className="text-ft-label">-</span>
                 )}
               </td>
             </tr>
