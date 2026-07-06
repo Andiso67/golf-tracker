@@ -25,15 +25,19 @@ import { playerFullName } from '@/types';
 import { useRfegHandicapSync } from '@/hooks/useRfegHandicapSync';
 import { calculateRoundStats } from '@/lib/stats';
 
-function HandicapChart({ handicap }: { handicap: number }) {
-  const bars = [60, 55, 70, 45, 50, 40];
+function HandicapChart({ handicap, history }: { handicap: number; history: { date: string; handicap: number }[] }) {
+  const data = history.length >= 2 ? history : [];
+  const maxH = data.length > 0 ? Math.max(...data.map((d) => d.handicap), handicap) : 54;
+  const bars = data.length > 0
+    ? data.map((d) => ({ label: new Date(d.date).toLocaleDateString(undefined, { month: 'short' }), value: Math.round((d.handicap / maxH) * 100) }))
+    : [{ label: 'HCP', value: Math.round((handicap / 54) * 100) }];
   return (
     <div className="flex items-end justify-between gap-1 h-20">
-      {bars.map((h, i) => (
+      {bars.map((b, i) => (
         <div key={i} className="flex-1 bg-ft-green/10 rounded-t-md relative overflow-hidden">
           <div
             className="absolute bottom-0 w-full bg-ft-green rounded-t-md transition-all"
-            style={{ height: `${h}%` }}
+            style={{ height: `${Math.max(b.value, 5)}%` }}
           />
         </div>
       ))}
@@ -47,6 +51,7 @@ function HomeContent() {
   const courses = useStore((s) => s.courses);
   const activeRoundId = useStore((s) => s.activeRoundId);
   const getRoundStats = useStore((s) => s.getRoundStats);
+  const handicapHistory = useStore((s) => s.handicapHistory);
   const logout = useStore((s) => s.logout);
   const auth = useStore((s) => s.auth);
   const _syncing = useStore((s) => s._syncing);
@@ -161,7 +166,7 @@ function HomeContent() {
               </span>
               <span className="text-[10px] font-medium text-ft-label">Last 6 Months</span>
             </div>
-            <HandicapChart handicap={player?.handicap ?? 0} />
+            <HandicapChart handicap={player?.handicap ?? 0} history={handicapHistory} />
           </div>
         </section>
 
