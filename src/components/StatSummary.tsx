@@ -34,7 +34,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
             value={ps.stablefordTotal}
             sublabel={t('scorecard.points')}
             icon={Trophy}
-            iconColor={ps.stablefordTotal >= 36 ? 'text-ft-green-bright' : 'text-ft-amber'}
+            color={ps.stablefordTotal >= 36 ? 'green' : 'amber'}
           />
         ) : gameMode === 'match-play' && stats.matchPlayResult ? (
           <StatsCard
@@ -42,7 +42,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
             value={stats.matchPlayResult.upDown}
             sublabel={`${stats.matchPlayResult.playerAWon}-${stats.matchPlayResult.playerBWon}`}
             icon={Trophy}
-            iconColor="text-ft-green-bright"
+            color="green"
           />
         ) : (
           <StatsCard
@@ -50,7 +50,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
             value={ps.totalScore}
             sublabel={`${ps.scoreToPar > 0 ? '+' : ''}${ps.scoreToPar}`}
             icon={Target}
-            iconColor={ps.scoreToPar <= 0 ? 'text-ft-green-bright' : 'text-ft-rose'}
+            color={ps.scoreToPar <= 0 ? 'green' : 'rose'}
           />
         )}
         <StatsCard
@@ -58,7 +58,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
           value={ps.totalPutts}
           sublabel={`${ps.avgPutts} ${t('statSummary.avg')}`}
           icon={CircleDot}
-          iconColor="text-ft-blue"
+          color="blue"
         />
       </div>
 
@@ -68,21 +68,21 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
           value={`${ps.fairwaysPercentage}%`}
           sublabel={`${ps.fairwaysHit}/${ps.fairwaysTotal}`}
           icon={MapPin}
-          iconColor="text-ft-amber"
+          color="amber"
         />
         <StatsCard
           label={t('statSummary.gir')}
           value={`${ps.girPercentage}%`}
           sublabel={`${ps.gir}/${ps.girTotal}`}
           icon={Flag}
-          iconColor="text-ft-green-bright"
+          color="green"
         />
         <StatsCard
           label={t('statSummary.scrambling')}
           value={`${ps.scramblingPercentage}%`}
           sublabel={`${ps.scrambling}/${ps.scramblingTotal}`}
           icon={Navigation}
-          iconColor="text-ft-violet"
+          color="violet"
         />
       </div>
 
@@ -92,13 +92,13 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
           value={`${ps.sandSavePercentage}%`}
           sublabel={`${ps.sandSaves}/${ps.sandSavesTotal}`}
           icon={Droplets}
-          iconColor="text-ft-blue"
+          color="cyan"
         />
         <StatsCard
           label={t('statSummary.penalties')}
           value={ps.totalPenalties}
           icon={CircleDot}
-          iconColor="text-ft-rose"
+          color="rose"
         />
       </div>
 

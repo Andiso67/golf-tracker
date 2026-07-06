@@ -285,7 +285,7 @@ function RoundContent({ roundId }: { roundId: string }) {
               <button
                 key={p.playerId}
                 onClick={() => setActivePlayerIndex(i)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
+                className={`rounded-xl px-2.5 py-1 text-xs font-medium transition-all ${
                   i === activePlayerIndex
                     ? 'bg-ft-green text-white'
                     : 'border border-ft-border bg-ft-surface text-ft-muted'
@@ -415,11 +415,11 @@ function RoundContent({ roundId }: { roundId: string }) {
             )}
 
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <button onClick={() => { if (!round.completed) handleSaveHole(); if (activeHoleIndex > 0) prevHole(); }} disabled={activeHoleIndex === 0} className="flex items-center justify-center gap-2 rounded-lg border border-ft-border bg-ft-surface py-3.5 text-xs font-bold text-ft-text transition-all active:scale-[0.98] disabled:opacity-30">
+              <button onClick={() => { if (!round.completed) handleSaveHole(); if (activeHoleIndex > 0) prevHole(); }} disabled={activeHoleIndex === 0} className="flex items-center justify-center gap-2 rounded-xl border border-ft-border bg-ft-surface py-3.5 text-xs font-bold text-ft-text transition-all active:scale-[0.98] disabled:opacity-30">
                 <ArrowLeft size={16} />
                 {t('scorecard.prevHole')}
               </button>
-              <button onClick={() => { if (round.completed) { if (activeHoleIndex < (currentPlayer?.holes.length || 1) - 1) nextHole(); } else { if (activeHoleIndex < (currentPlayer?.holes.length || 1) - 1 || activePlayerIndex < round.players.length - 1) { handleSaveAndNext(); } else { handleSaveHole(); } } }} disabled={activeHoleIndex === (currentPlayer?.holes.length || 1) - 1} className="flex items-center justify-center gap-2 rounded-lg bg-ft-green py-3.5 text-xs font-bold text-white shadow-sm transition-all active:scale-[0.98] disabled:opacity-50">
+              <button onClick={() => { if (round.completed) { if (activeHoleIndex < (currentPlayer?.holes.length || 1) - 1) nextHole(); } else { if (activeHoleIndex < (currentPlayer?.holes.length || 1) - 1 || activePlayerIndex < round.players.length - 1) { handleSaveAndNext(); } else { handleSaveHole(); } } }} disabled={activeHoleIndex === (currentPlayer?.holes.length || 1) - 1} className="flex items-center justify-center gap-2 rounded-xl bg-ft-green py-3.5 text-xs font-bold text-white shadow-sm transition-all active:scale-[0.98] disabled:opacity-50">
                 {t('scorecard.nextHole')}
                 <ArrowLeft size={16} className="rotate-180" />
               </button>
@@ -457,7 +457,7 @@ function RoundContent({ roundId }: { roundId: string }) {
           >
             <button
               onClick={handleComplete}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-ft-green py-4 text-lg font-bold text-white shadow-sm transition-all active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-ft-green py-4 text-lg font-bold text-white shadow-sm transition-all active:scale-[0.98]"
             >
               <CheckCircle2 size={22} />
               {t('round.completeRound')}
@@ -465,7 +465,7 @@ function RoundContent({ roundId }: { roundId: string }) {
           </motion.div>
         )}
         {round.completed && (
-          <div className="mt-4 flex items-center justify-center gap-2 rounded-lg bg-ft-green/10 py-3 text-sm font-semibold text-ft-green-bright">
+          <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-ft-green/10 py-3 text-sm font-semibold text-ft-green-bright">
             <CheckCircle2 size={18} />
             Round completed
           </div>
@@ -477,13 +477,13 @@ function RoundContent({ roundId }: { roundId: string }) {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setDeleteConfirm(false)}
-                className="flex-1 rounded-lg border border-ft-border py-3 text-sm font-medium text-ft-muted transition-all active:scale-[0.98]"
+                className="flex-1 rounded-xl border border-ft-border py-3 text-sm font-medium text-ft-muted transition-all active:scale-[0.98]"
               >
                 {t('players.cancel')}
               </button>
               <button
                 onClick={handleDelete}
-                className="flex-1 rounded-lg bg-ft-rose py-3 text-sm font-bold text-white shadow-sm transition-all active:scale-[0.98]"
+                className="flex-1 rounded-xl bg-ft-rose py-3 text-sm font-bold text-white shadow-sm transition-all active:scale-[0.98]"
               >
                 {t('round.confirmDelete')}
               </button>
@@ -491,7 +491,7 @@ function RoundContent({ roundId }: { roundId: string }) {
           ) : (
             <button
               onClick={() => { mediumTap(); setDeleteConfirm(true) }}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-ft-rose/30 py-3 text-sm font-medium text-ft-rose transition-all active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-ft-rose/30 py-3 text-sm font-medium text-ft-rose transition-all active:scale-[0.98]"
             >
               <Trash2 size={18} />
               {t('round.delete')}
