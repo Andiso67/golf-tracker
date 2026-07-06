@@ -167,7 +167,7 @@ export default function DashboardPage() {
                   label={t('dashboard.avgScore')}
                   value={avgStats.avgScore}
                   icon={Target}
-                  color="green"
+                  color="emerald"
                 />
                 <StatsCard
                   label={t('dashboard.avgGir')}

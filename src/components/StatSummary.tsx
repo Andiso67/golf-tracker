@@ -34,7 +34,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
             value={ps.stablefordTotal}
             sublabel={t('scorecard.points')}
             icon={Trophy}
-            color={ps.stablefordTotal >= 36 ? 'green' : 'amber'}
+            color={ps.stablefordTotal >= 36 ? 'emerald' : 'amber'}
           />
         ) : gameMode === 'match-play' && stats.matchPlayResult ? (
           <StatsCard
@@ -42,7 +42,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
             value={stats.matchPlayResult.upDown}
             sublabel={`${stats.matchPlayResult.playerAWon}-${stats.matchPlayResult.playerBWon}`}
             icon={Trophy}
-            color="green"
+            color="emerald"
           />
         ) : (
           <StatsCard
@@ -50,7 +50,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
             value={ps.totalScore}
             sublabel={`${ps.scoreToPar > 0 ? '+' : ''}${ps.scoreToPar}`}
             icon={Target}
-            color={ps.scoreToPar <= 0 ? 'green' : 'rose'}
+            color={ps.scoreToPar <= 0 ? 'emerald' : 'rose'}
           />
         )}
         <StatsCard
@@ -75,7 +75,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
           value={`${ps.girPercentage}%`}
           sublabel={`${ps.gir}/${ps.girTotal}`}
           icon={Flag}
-          color="green"
+          color="emerald"
         />
         <StatsCard
           label={t('statSummary.scrambling')}
