@@ -107,18 +107,21 @@ async function main() {
         totalHoles: 18,
         completed: true,
         holes: {
-          create: r.scores.map((score, idx) => ({
+          create: r.scores.map((score, idx) => {
+            const p = score <= pars18[idx] ? Math.max(1, Math.round(pars18[idx] / 3)) : 2;
+            return {
             number: idx + 1,
             par: pars18[idx],
             score,
             fairwayHit: score <= pars18[idx] ? 'Yes' : idx % 3 === 0 ? 'Left' : 'Right',
-            gir: score - putts <= pars18[idx] - 2,
-            putts: score <= pars18[idx] ? Math.max(1, Math.round(pars18[idx] / 3)) : 2,
+            gir: score - p <= pars18[idx] - 2,
+            putts: p,
             puttDistance: score <= pars18[idx] ? 'R_1_2' : 'R_2_4',
             penalties: score > pars18[idx] + 1 ? 1 : 0,
             sandSave: 0,
             approach: 0,
-          })),
+          };
+          }),
         },
       },
     })
@@ -150,18 +153,21 @@ async function main() {
       totalHoles: 18,
       completed: false,
       holes: {
-        create: activeScores.map((score, idx) => ({
+        create: activeScores.map((score, idx) => {
+          const p = score > 0 ? Math.max(1, Math.round(pars18[idx] / 3)) : 0;
+          return {
           number: idx + 1,
           par: pars18[idx],
           score,
           fairwayHit: score > 0 ? (score <= pars18[idx] ? 'Yes' : 'Right') : null,
-          gir: score > 0 ? score - putts <= pars18[idx] - 2 : null,
-          putts: score > 0 ? Math.max(1, Math.round(pars18[idx] / 3)) : 0,
+          gir: score > 0 ? score - p <= pars18[idx] - 2 : null,
+          putts: p,
           puttDistance: score > 0 ? 'R_1_2' : null,
           penalties: score > pars18[idx] + 1 ? 1 : 0,
           sandSave: 0,
           approach: 0,
-        })),
+          };
+        }),
       },
     },
   })
