@@ -14,6 +14,13 @@ enum FairwayHit {
   Right
 }
 
+enum GirDirection {
+  Long
+  Short
+  Left
+  Right
+}
+
 enum PuttDistance {
   LT_1
   R_1_2
@@ -118,6 +125,7 @@ model Hole {
   score     Int         @default(0)
   fairwayHit FairwayHit?
   gir       Boolean?
+  girDirection GirDirection?
   putts     Int         @default(0)
   puttDistance PuttDistance?
   penalties Int         @default(0)

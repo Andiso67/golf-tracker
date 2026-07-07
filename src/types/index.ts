@@ -128,6 +128,7 @@ export interface HoleData {
   score: number;
   fairwayHit: 'Yes' | 'No' | 'Left' | 'Right' | null;
   gir: boolean | null;
+  girDirection: 'Long' | 'Short' | 'Left' | 'Right' | null;
   putts: number;
   puttDistance: '<1' | '1-2' | '2-4' | '4-8' | '+8' | null;
   penalties: number;
@@ -144,6 +145,7 @@ export function createEmptyHole(number: number, par: number = 4, handicap?: numb
     score: 0,
     fairwayHit: null,
     gir: null,
+    girDirection: null,
     putts: 0,
     puttDistance: null,
     penalties: 0,

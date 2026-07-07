@@ -8,6 +8,7 @@ import {
   BarChart3,
   Bell,
   CheckCircle2,
+  Flag,
   Minus,
   Plus,
   Users,
@@ -109,6 +110,8 @@ function RoundContent({ roundId }: { roundId: string }) {
   const [bunker, setBunker] = useState(0);
   const [approach, setApproach] = useState(0);
   const [puttDistance, setPuttDistance] = useState<HoleData['puttDistance']>(null);
+  const [girOverride, setGirOverride] = useState<boolean | null>(null);
+  const [girDirection, setGirDirection] = useState<HoleData['girDirection']>(null);
 
   const handleHoleChange = useCallback((hole: HoleData) => {
     setStrokes(hole.score > 0 ? hole.score : hole.par);
@@ -120,6 +123,8 @@ function RoundContent({ roundId }: { roundId: string }) {
     setBunker(hole.sandSave || 0);
     setApproach(hole.approach || 0);
     setPuttDistance(hole.puttDistance || null);
+    setGirOverride(hole.gir);
+    setGirDirection(hole.girDirection || null);
   }, []);
 
   useEffect(() => {
@@ -136,7 +141,8 @@ function RoundContent({ roundId }: { roundId: string }) {
       score: strokes,
       putts,
       fairwayHit: mappedFairway,
-      gir: strokes > 0 && strokes <= currentHole.par && putts <= 2,
+      gir: girOverride ?? (strokes > 0 && strokes <= currentHole.par && putts <= 2),
+      girDirection: girDirection,
       sandSave: bunker,
       approach: approach,
       puttDistance: puttDistance,
@@ -422,11 +428,50 @@ function RoundContent({ roundId }: { roundId: string }) {
                       </div>
                     ) : (
                       <button onClick={() => setFairwayOption(fairwayOption === 'Miss' ? null : 'Miss')} className={`flex flex-col items-center gap-1 rounded-xl py-2.5 text-xs font-semibold transition-all active:scale-95 ${fairwayOption === 'Miss' ? 'border border-ft-rose/50 bg-ft-rose/10 text-ft-rose' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
-                        <X size={18} />
-                        {t('scorecard.miss')}
-                      </button>
-                    )}
+                            <X size={18} />
+                            {t('scorecard.miss')}
+                          </button>
+                        )}
                   </div>
+                </div>
+
+                <div className="rounded-xl border border-ft-border bg-ft-card p-4">
+                  <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-ft-label">{t('scorecard.gir')}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="shrink-0 text-ft-green-bright">
+                      <Flag size={24} />
+                    </div>
+                    <div className="flex flex-1 gap-2">
+                      {[true, false].map((val) => {
+                        const active = (girOverride ?? (strokes > 0 && strokes <= (currentHole?.par || 4) && putts <= 2)) === val;
+                        return round.completed ? (
+                          <div key={String(val)} className={`flex-1 rounded-xl py-2.5 text-center text-xs font-semibold ${active ? 'bg-ft-green text-white shadow-sm' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
+                            {val ? t('scorecard.yes') : t('scorecard.no')}
+                          </div>
+                        ) : (
+                          <button key={String(val)} onClick={() => setGirOverride(active ? null : val)} className={`flex-1 rounded-xl py-2.5 text-center text-xs font-semibold transition-all active:scale-95 ${active ? 'bg-ft-green text-white shadow-sm' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
+                            {val ? t('scorecard.yes') : t('scorecard.no')}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {(girOverride ?? (strokes > 0 && strokes <= (currentHole?.par || 4) && putts <= 2)) === false && (
+                    <div className="mt-3 grid grid-cols-4 gap-2">
+                      {(['Long', 'Short', 'Left', 'Right'] as const).map((dir) => {
+                        const active = girDirection === dir;
+                        return round.completed ? (
+                          <div key={dir} className={`rounded-xl py-2 text-center text-xs font-semibold ${active ? 'bg-ft-amber text-white shadow-sm' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
+                            {t(`scorecard.dir${dir}`)}
+                          </div>
+                        ) : (
+                          <button key={dir} onClick={() => setGirDirection(active ? null : dir)} className={`rounded-xl py-2 text-center text-xs font-semibold transition-all active:scale-95 ${active ? 'bg-ft-amber text-white shadow-sm' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
+                            {t(`scorecard.dir${dir}`)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 <div className="rounded-xl border border-ft-border bg-ft-card p-4">

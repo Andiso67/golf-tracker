@@ -27,6 +27,7 @@ function holeWithoutRound(
     score: h.score,
     fairwayHit: h.fairwayHit as any,
     gir: h.gir,
+    girDirection: h.girDirection as any,
     putts: h.putts,
     puttDistance: h.puttDistance
       ? (puttDistanceToDb[h.puttDistance] as any)
@@ -45,6 +46,7 @@ function holeFromDb(h: any): HoleData {
     score: h.score,
     fairwayHit: h.fairwayHit as HoleData['fairwayHit'],
     gir: h.gir,
+    girDirection: h.girDirection as HoleData['girDirection'],
     putts: h.putts,
     puttDistance: h.puttDistance
       ? (puttDistanceFromDb[h.puttDistance] as HoleData['puttDistance'])

@@ -38,6 +38,10 @@ export const createRoundSchema = z.object({
           .nullable()
           .default(null),
         gir: z.boolean().nullable().default(null),
+        girDirection: z
+          .union([z.literal('Long'), z.literal('Short'), z.literal('Left'), z.literal('Right')])
+          .nullable()
+          .default(null),
         putts: z.number().int().default(0),
         puttDistance: z
           .union([z.literal('<1'), z.literal('1-2'), z.literal('2-4'), z.literal('4-8'), z.literal('+8')])
@@ -60,6 +64,10 @@ export const updateHoleSchema = z.object({
     .nullable()
     .optional(),
   gir: z.boolean().nullable().optional(),
+  girDirection: z
+    .union([z.literal('Long'), z.literal('Short'), z.literal('Left'), z.literal('Right')])
+    .nullable()
+    .optional(),
   putts: z.number().int().optional(),
   puttDistance: z
     .union([z.literal('<1'), z.literal('1-2'), z.literal('2-4'), z.literal('4-8'), z.literal('+8')])
