@@ -10,6 +10,7 @@ import {
   CircleDot,
   BarChart3,
   Trash2,
+  Droplets,
 } from 'lucide-react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -109,7 +110,7 @@ export default function DashboardPage() {
     if (completedRounds.length === 0) return null;
     const allStats = completedRounds.map((r) => {
       const s = calculateRoundStats(r.players, r.gameMode);
-      return s.playerStats.find((ps) => ps.playerId === currentPlayerId) || s.playerStats[0] || { totalScore: 0, girPercentage: 0, avgPutts: 0, fairwaysPercentage: 0, scoreToPar: 0 };
+      return s.playerStats.find((ps) => ps.playerId === currentPlayerId) || s.playerStats[0] || { totalScore: 0, girPercentage: 0, avgPutts: 0, fairwaysPercentage: 0, scoreToPar: 0, sandSavePercentage: 0, avgDrivingDistance: 0 };
     });
     return {
       avgScore: Math.round(
@@ -125,6 +126,14 @@ export default function DashboardPage() {
         ) / 10,
       avgFairways: Math.round(
         allStats.reduce((s, st) => s + st.fairwaysPercentage, 0) /
+          allStats.length
+      ),
+      avgSandSaves: Math.round(
+        allStats.reduce((s, st) => s + st.sandSavePercentage, 0) /
+          allStats.length
+      ),
+      avgDrive: Math.round(
+        allStats.reduce((s, st) => s + st.avgDrivingDistance, 0) /
           allStats.length
       ),
     };
@@ -181,11 +190,24 @@ export default function DashboardPage() {
                   icon={CircleDot}
                   color="violet"
                 />
-                <StatsCard
+                  <StatsCard
                   label={t('dashboard.avgFairways')}
                   value={`${avgStats.avgFairways}%`}
                   icon={TrendingUp}
                   color="amber"
+                />
+                <StatsCard
+                  label={t('statSummary.sandSaves')}
+                  value={`${avgStats.avgSandSaves > 0 ? avgStats.avgSandSaves : '-'}%`}
+                  icon={Droplets}
+                  color="cyan"
+                />
+                <StatsCard
+                  label={t('dashboard.avgDrive')}
+                  value={avgStats.avgDrive > 0 ? `${avgStats.avgDrive}` : '-'}
+                  sublabel={avgStats.avgDrive > 0 ? 'm' : t('statSummary.na')}
+                  icon={Target}
+                  color="blue"
                 />
               </div>
             )}
