@@ -141,7 +141,7 @@ function RoundContent({ roundId }: { roundId: string }) {
       score: strokes,
       putts,
       fairwayHit: mappedFairway,
-      gir: girOverride ?? (strokes > 0 && strokes <= currentHole.par && putts <= 2),
+      gir: girOverride ?? (strokes > 0 && strokes - putts <= currentHole.par - 2),
       girDirection: girDirection,
       sandSave: bunker,
       approach: approach,
@@ -443,7 +443,7 @@ function RoundContent({ roundId }: { roundId: string }) {
                     </div>
                     <div className="flex flex-1 gap-2">
                       {[true, false].map((val) => {
-                        const active = (girOverride ?? (strokes > 0 && strokes <= (currentHole?.par || 4) && putts <= 2)) === val;
+                        const active = (girOverride ?? (strokes > 0 && strokes - putts <= (currentHole?.par || 4) - 2)) === val;
                         return round.completed ? (
                           <div key={String(val)} className={`flex-1 rounded-xl py-2.5 text-center text-xs font-semibold ${active ? 'bg-ft-green text-white shadow-sm' : 'border border-ft-border bg-ft-surface text-ft-muted'}`}>
                             {val ? t('scorecard.yes') : t('scorecard.no')}
@@ -456,7 +456,7 @@ function RoundContent({ roundId }: { roundId: string }) {
                       })}
                     </div>
                   </div>
-                  {(girOverride ?? (strokes > 0 && strokes <= (currentHole?.par || 4) && putts <= 2)) === false && (
+                  {(girOverride ?? (strokes > 0 && strokes - putts <= (currentHole?.par || 4) - 2)) === false && (
                     <div className="mt-3 grid grid-cols-4 gap-2">
                       {(['Long', 'Short', 'Left', 'Right'] as const).map((dir) => {
                         const active = girDirection === dir;
