@@ -28,7 +28,8 @@ function calculatePlayerStats(holes: HoleData[]): Omit<PlayerStats, 'playerId' |
     (h) => h.score <= h.par
   ).length;
 
-  const totalBunker = played.reduce((sum, h) => sum + h.sandSave, 0);
+  const sandSavesTotal = played.filter((h) => h.sandSave > 0).length;
+  const sandSaves = played.filter((h) => h.sandSave > 0 && h.score <= h.par).length;
 
   const totalPenalties = played.reduce((sum, h) => sum + h.penalties, 0);
 
@@ -44,6 +45,16 @@ function calculatePlayerStats(holes: HoleData[]): Omit<PlayerStats, 'playerId' |
       puttsByDistance[h.puttDistance]++;
     }
   }
+
+  const drivingDistances = played.filter(
+    (h) => h.drivingDistance != null && h.drivingDistance > 0
+  );
+  const avgDrivingDistance = drivingDistances.length > 0
+    ? Math.round(
+        drivingDistances.reduce((s, h) => s + h.drivingDistance!, 0) /
+          drivingDistances.length
+      )
+    : 0;
 
   return {
     totalScore,
@@ -69,11 +80,15 @@ function calculatePlayerStats(holes: HoleData[]): Omit<PlayerStats, 'playerId' |
       scramblingHoles.length > 0
         ? Math.round((scrambling / scramblingHoles.length) * 100)
         : 0,
-    sandSaves: totalBunker,
-    sandSavesTotal: totalBunker,
-    sandSavePercentage: 0,
+    sandSaves,
+    sandSavesTotal,
+    sandSavePercentage:
+      sandSavesTotal > 0
+        ? Math.round((sandSaves / sandSavesTotal) * 100)
+        : 0,
     totalPenalties,
     puttsByDistance,
+    avgDrivingDistance,
   };
 }
 

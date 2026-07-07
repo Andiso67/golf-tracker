@@ -86,7 +86,7 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <StatsCard
           label={t('statSummary.sandSaves')}
           value={`${ps.sandSavePercentage}%`}
@@ -99,6 +99,13 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
           value={ps.totalPenalties}
           icon={CircleDot}
           color="rose"
+        />
+        <StatsCard
+          label={t('dashboard.avgDrive')}
+          value={ps.avgDrivingDistance > 0 ? `${ps.avgDrivingDistance}` : '-'}
+          sublabel={ps.avgDrivingDistance > 0 ? 'm' : t('statSummary.na')}
+          icon={Target}
+          color="blue"
         />
       </div>
 

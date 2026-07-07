@@ -209,6 +209,7 @@ const en = {
     scrambling: 'Scrambling',
     sandSaves: 'Bunker',
     penalties: 'Penalties',
+    na: 'N/A',
   },
   dashboard: {
     title: 'Statistics',
@@ -650,6 +651,7 @@ const es: typeof en = {
     scrambling: 'Recuperación',
     sandSaves: 'Búnker',
     penalties: 'Penalizaciones',
+    na: 'N/A',
   },
   dashboard: {
     title: 'Estadísticas',

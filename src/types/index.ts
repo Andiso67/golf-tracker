@@ -198,6 +198,7 @@ export interface PlayerStats {
   sandSavePercentage: number;
   totalPenalties: number;
   puttsByDistance: Record<'<1' | '1-2' | '2-4' | '4-8' | '+8', number>;
+  avgDrivingDistance: number;
 }
 
 export interface MatchPlayResult {
