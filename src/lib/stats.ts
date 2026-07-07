@@ -56,6 +56,21 @@ function calculatePlayerStats(holes: HoleData[]): Omit<PlayerStats, 'playerId' |
       )
     : 0;
 
+  const par3 = played.filter((h) => h.par === 3);
+  const par4 = played.filter((h) => h.par === 4);
+  const par5 = played.filter((h) => h.par === 5);
+
+  const par3Total = par3.reduce((s, h) => s + h.score, 0);
+  const par4Total = par4.reduce((s, h) => s + h.score, 0);
+  const par5Total = par5.reduce((s, h) => s + h.score, 0);
+
+  const front = played.filter((h) => h.number <= 9);
+  const back = played.filter((h) => h.number > 9);
+  const frontScore = front.reduce((s, h) => s + h.score, 0);
+  const backScore = back.reduce((s, h) => s + h.score, 0);
+  const frontPar = front.reduce((s, h) => s + h.par, 0);
+  const backPar = back.reduce((s, h) => s + h.par, 0);
+
   return {
     totalScore,
     scoreToPar,
@@ -89,6 +104,21 @@ function calculatePlayerStats(holes: HoleData[]): Omit<PlayerStats, 'playerId' |
     totalPenalties,
     puttsByDistance,
     avgDrivingDistance,
+    par3Count: par3.length,
+    par3Avg: par3.length > 0 ? Math.round((par3Total / par3.length) * 10) / 10 : 0,
+    par3ToPar: par3Total - par3.length * 3,
+    par4Count: par4.length,
+    par4Avg: par4.length > 0 ? Math.round((par4Total / par4.length) * 10) / 10 : 0,
+    par4ToPar: par4Total - par4.length * 4,
+    par5Count: par5.length,
+    par5Avg: par5.length > 0 ? Math.round((par5Total / par5.length) * 10) / 10 : 0,
+    par5ToPar: par5Total - par5.length * 5,
+    front9Score: frontScore,
+    front9ToPar: frontScore - frontPar,
+    front9Putts: front.reduce((s, h) => s + h.putts, 0),
+    back9Score: backScore,
+    back9ToPar: backScore - backPar,
+    back9Putts: back.reduce((s, h) => s + h.putts, 0),
   };
 }
 

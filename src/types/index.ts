@@ -199,6 +199,21 @@ export interface PlayerStats {
   totalPenalties: number;
   puttsByDistance: Record<'<1' | '1-2' | '2-4' | '4-8' | '+8', number>;
   avgDrivingDistance: number;
+  par3Count: number;
+  par3Avg: number;
+  par3ToPar: number;
+  par4Count: number;
+  par4Avg: number;
+  par4ToPar: number;
+  par5Count: number;
+  par5Avg: number;
+  par5ToPar: number;
+  front9Score: number;
+  front9ToPar: number;
+  front9Putts: number;
+  back9Score: number;
+  back9ToPar: number;
+  back9Putts: number;
 }
 
 export interface MatchPlayResult {

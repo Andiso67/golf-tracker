@@ -8,6 +8,9 @@ import {
   Droplets,
   CircleDot,
   Trophy,
+  Hash,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
 import StatsCard from './StatsCard';
 import { RoundStats, type GameMode } from '@/types';
@@ -106,6 +109,47 @@ export default function StatSummary({ stats, gameMode = 'stroke-play', activePla
           sublabel={ps.avgDrivingDistance > 0 ? 'm' : t('statSummary.na')}
           icon={Target}
           color="blue"
+        />
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        <StatsCard
+          label="Par 3"
+          value={`${ps.par3Avg}`}
+          sublabel={`${ps.par3ToPar > 0 ? '+' : ''}${ps.par3ToPar}`}
+          icon={Hash}
+          color={ps.par3ToPar <= 0 ? 'emerald' : 'rose'}
+        />
+        <StatsCard
+          label="Par 4"
+          value={`${ps.par4Avg}`}
+          sublabel={`${ps.par4ToPar > 0 ? '+' : ''}${ps.par4ToPar}`}
+          icon={Hash}
+          color={ps.par4ToPar <= 0 ? 'emerald' : 'rose'}
+        />
+        <StatsCard
+          label="Par 5"
+          value={`${ps.par5Avg}`}
+          sublabel={`${ps.par5ToPar > 0 ? '+' : ''}${ps.par5ToPar}`}
+          icon={Hash}
+          color={ps.par5ToPar <= 0 ? 'emerald' : 'rose'}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <StatsCard
+          label={t('statSummary.front9')}
+          value={ps.front9Score}
+          sublabel={`${ps.front9ToPar > 0 ? '+' : ''}${ps.front9ToPar} · ${ps.front9Putts} ${t('statSummary.putts')}`}
+          icon={ArrowLeft}
+          color={ps.front9ToPar <= 0 ? 'emerald' : 'rose'}
+        />
+        <StatsCard
+          label={t('statSummary.back9')}
+          value={ps.back9Score}
+          sublabel={`${ps.back9ToPar > 0 ? '+' : ''}${ps.back9ToPar} · ${ps.back9Putts} ${t('statSummary.putts')}`}
+          icon={ArrowRight}
+          color={ps.back9ToPar <= 0 ? 'emerald' : 'rose'}
         />
       </div>
 

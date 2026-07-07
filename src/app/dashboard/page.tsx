@@ -468,6 +468,69 @@ export default function DashboardPage() {
               </div>
             )}
 
+            {completedRounds.length > 0 && (() => {
+              const par3Total = { score: 0, count: 0 };
+              const par4Total = { score: 0, count: 0 };
+              const par5Total = { score: 0, count: 0 };
+              let frontScore = 0, frontPar = 0, frontPutts = 0;
+              let backScore = 0, backPar = 0, backPutts = 0;
+              for (const r of completedRounds) {
+                const holes = r.players.find((p) => p.playerId === currentPlayerId)?.holes || r.players[0]?.holes || [];
+                for (const h of holes) {
+                  if (h.par === 3) { par3Total.score += h.score || 0; par3Total.count++; }
+                  if (h.par === 4) { par4Total.score += h.score || 0; par4Total.count++; }
+                  if (h.par === 5) { par5Total.score += h.score || 0; par5Total.count++; }
+                  if (h.number <= 9) { frontScore += h.score || 0; frontPar += h.par; frontPutts += h.putts || 0; }
+                  else { backScore += h.score || 0; backPar += h.par; backPutts += h.putts || 0; }
+                }
+              }
+              const par3Avg = par3Total.count > 0 ? (par3Total.score / par3Total.count).toFixed(1) : '—';
+              const par4Avg = par4Total.count > 0 ? (par4Total.score / par4Total.count).toFixed(1) : '—';
+              const par5Avg = par5Total.count > 0 ? (par5Total.score / par5Total.count).toFixed(1) : '—';
+              const p3tp = par3Total.score - par3Total.count * 3;
+              const p4tp = par4Total.score - par4Total.count * 4;
+              const p5tp = par5Total.score - par5Total.count * 5;
+              return (
+                <>
+                  <div className="mb-6 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                      Score by Par
+                    </h3>
+                    <div className="grid grid-cols-3 gap-3 text-center text-xs">
+                      <div>
+                        <p className="text-lg font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{par3Avg}</p>
+                        <p className="text-zinc-400">Par 3 <span className={p3tp <= 0 ? 'text-emerald-500' : 'text-rose-500'}>({p3tp > 0 ? '+' : ''}{p3tp})</span></p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{par4Avg}</p>
+                        <p className="text-zinc-400">Par 4 <span className={p4tp <= 0 ? 'text-emerald-500' : 'text-rose-500'}>({p4tp > 0 ? '+' : ''}{p4tp})</span></p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{par5Avg}</p>
+                        <p className="text-zinc-400">Par 5 <span className={p5tp <= 0 ? 'text-emerald-500' : 'text-rose-500'}>({p5tp > 0 ? '+' : ''}{p5tp})</span></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-6 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                      Front 9 vs Back 9
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3 text-center text-xs">
+                      <div>
+                        <p className="text-lg font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{frontScore}</p>
+                        <p className="text-zinc-400">Front 9 (par {frontPar}) · {frontPutts} putts</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{backScore}</p>
+                        <p className="text-zinc-400">Back 9 (par {backPar}) · {backPutts} putts</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+
             <div className="mb-6">
               <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 {t('dashboard.allRounds')}

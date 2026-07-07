@@ -210,6 +210,8 @@ const en = {
     sandSaves: 'Bunker',
     penalties: 'Penalties',
     na: 'N/A',
+    front9: 'Front 9',
+    back9: 'Back 9',
   },
   dashboard: {
     title: 'Statistics',
@@ -652,6 +654,8 @@ const es: typeof en = {
     sandSaves: 'Búnker',
     penalties: 'Penalizaciones',
     na: 'N/A',
+    front9: 'Front 9',
+    back9: 'Back 9',
   },
   dashboard: {
     title: 'Estadísticas',
