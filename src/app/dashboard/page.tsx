@@ -97,14 +97,28 @@ export default function DashboardPage() {
   }, [completedRounds, locale, currentPlayerId]);
 
   const handicapData = useMemo(() => {
-    return handicapHistory.map((entry) => ({
+    const fromStore = handicapHistory.map((entry) => ({
       date: new Date(entry.date).toLocaleDateString(locale, {
         month: 'short',
         day: 'numeric',
       }),
       handicap: entry.handicap,
     }));
-  }, [handicapHistory, locale]);
+    if (fromStore.length > 1) return fromStore;
+    const fromRounds = completedRounds.map((round) => {
+      const stats = calculateRoundStats(round.players, round.gameMode);
+      const myStats = stats.playerStats.find((ps) => ps.playerId === currentPlayerId) || stats.playerStats[0];
+      const scoreToPar = myStats?.scoreToPar ?? 0;
+      return {
+        date: new Date(round.date).toLocaleDateString(locale, {
+          month: 'short',
+          day: 'numeric',
+        }),
+        handicap: Math.round(scoreToPar * 0.96 * 10) / 10,
+      };
+    });
+    return fromRounds.length > 1 ? fromRounds : fromStore;
+  }, [handicapHistory, completedRounds, locale, currentPlayerId]);
 
   const avgStats = useMemo(() => {
     if (completedRounds.length === 0) return null;
