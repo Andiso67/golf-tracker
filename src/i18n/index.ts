@@ -11,7 +11,10 @@ const en = {
     players: 'Players',
     settings: 'Settings',
     profile: 'Profile',
+    championships: 'Championships',
+    virtualReferee: 'Virtual Ref',
   },
+  comingSoon: 'Coming Soon',
   home: {
     greeting: 'Hey, {name}',
     appTitle: 'Golf Tracker',
@@ -455,7 +458,10 @@ const es: typeof en = {
     players: 'Jugadores',
     settings: 'Ajustes',
     profile: 'Perfil',
+    championships: 'Campeonatos',
+    virtualReferee: 'Árbitro Virtual',
   },
+  comingSoon: 'Próximamente',
   home: {
     greeting: 'Hola, {name}',
     appTitle: 'Golf Tracker',

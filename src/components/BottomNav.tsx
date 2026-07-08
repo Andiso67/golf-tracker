@@ -3,7 +3,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Edit3, ChartBar, User } from 'lucide-react';
+import { LayoutDashboard, Edit3, ChartBar, User, Trophy, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/i18n/useTranslation';
 import { lightTap } from '@/lib/haptics';
@@ -13,6 +13,8 @@ const navLinks = [
   { href: '/new-round', icon: Edit3, key: 'nav.new' },
   { href: '/dashboard', icon: ChartBar, key: 'nav.stats' },
   { href: '/players', icon: User, key: 'nav.profile' },
+  { href: '/campeonatos', icon: Trophy, key: 'nav.championships' },
+  { href: '/arbitro-virtual', icon: Shield, key: 'nav.virtualReferee' },
 ];
 
 function NavContent() {
